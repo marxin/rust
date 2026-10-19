@@ -1807,11 +1807,14 @@ fn validate_commandline_args_with_session_available(sess: &Session) {
     }
 
     if (sess.opts.cg.linker_features.enabled.contains(LinkerFeatures::WILD)
-        || sess
-            .opts
-            .cg
-            .linker_flavor
-            .is_some_and(|flavor| matches!(flavor, LinkerFlavorCli::Gnu(_, LinkerSelection::Wild))))
+        || sess.opts.cg.linker_flavor.is_some_and(|flavor| {
+            matches!(
+                flavor,
+                LinkerFlavorCli::Gnu(_, LinkerSelection::Wild)
+                    | LinkerFlavorCli::Darwin(_, LinkerSelection::Wild)
+                    | LinkerFlavorCli::Msvc(_, LinkerSelection::Wild)
+            )
+        }))
         && !sess.target.supports_wild
     {
         sess.dcx().emit_err(diagnostics::UnsupportedWildTarget);

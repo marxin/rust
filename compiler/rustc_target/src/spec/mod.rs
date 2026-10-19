@@ -457,13 +457,15 @@ impl LinkerFlavor {
     /// flavor unmodified.
     pub fn with_lld_enabled(self) -> LinkerFlavor {
         match self {
-            LinkerFlavor::Gnu(cc, LinkerSelection::System) => {
+            LinkerFlavor::Gnu(cc, LinkerSelection::System | LinkerSelection::Wild) => {
                 LinkerFlavor::Gnu(cc, LinkerSelection::Lld)
             }
-            LinkerFlavor::Darwin(cc, LinkerSelection::System) => {
+            LinkerFlavor::Darwin(cc, LinkerSelection::System | LinkerSelection::Wild) => {
                 LinkerFlavor::Darwin(cc, LinkerSelection::Lld)
             }
-            LinkerFlavor::Msvc(LinkerSelection::System) => LinkerFlavor::Msvc(LinkerSelection::Lld),
+            LinkerFlavor::Msvc(LinkerSelection::System | LinkerSelection::Wild) => {
+                LinkerFlavor::Msvc(LinkerSelection::Lld)
+            }
             _ => self,
         }
     }

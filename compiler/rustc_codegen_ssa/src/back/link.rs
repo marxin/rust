@@ -1923,22 +1923,25 @@ pub fn linker_and_flavor(sess: &Session) -> (PathBuf, LinkerFlavor) {
     // linker-features CLI flag influence *that*, so that downstream code does not have to check for
     // both yet.
     fn adjust_flavor_to_features(
-        flavor: LinkerFlavor,
+        mut flavor: LinkerFlavor,
         features: LinkerFeaturesCli,
     ) -> LinkerFlavor {
         // Note: a linker feature cannot be both enabled and disabled on the CLI.
         // Prefer `+wild` over `+lld` feature.
         if features.enabled.contains(LinkerFeatures::WILD) {
-            flavor.with_wild_enabled()
-        } else if features.enabled.contains(LinkerFeatures::LLD) {
-            flavor.with_lld_enabled()
-        } else if features.disabled.contains(LinkerFeatures::WILD) {
-            flavor.with_wild_disabled()
-        } else if features.disabled.contains(LinkerFeatures::LLD) {
-            flavor.with_lld_disabled()
-        } else {
-            flavor
+            flavor = flavor.with_wild_enabled();
         }
+        if features.enabled.contains(LinkerFeatures::LLD) {
+            flavor = flavor.with_lld_enabled();
+        }
+        if features.disabled.contains(LinkerFeatures::LLD) {
+            flavor = flavor.with_lld_disabled();
+        }
+        if features.disabled.contains(LinkerFeatures::WILD) {
+            flavor = flavor.with_wild_disabled();
+        }
+
+        flavor
     }
 
     let features = sess.opts.cg.linker_features;
