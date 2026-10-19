@@ -841,6 +841,9 @@
 # Explicitly setting the linker for a target will override this option when targeting MSVC.
 #rust.bootstrap-override-lld = false
 
+# Indicates whether Wild will be compiled and made available in the sysroot for rustc to execute,
+#rust.wild = false
+
 # Indicates whether some LLVM tools, like llvm-objdump, will be made available in the
 # sysroot.
 #rust.llvm-tools = true
