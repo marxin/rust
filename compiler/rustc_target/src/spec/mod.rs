@@ -2701,6 +2701,7 @@ fn add_link_args_iter(
         LinkerFlavor::Gnu(cc, lld) => {
             assert_eq!(lld, LinkerSelection::System);
             insert(LinkerFlavor::Gnu(cc, LinkerSelection::Lld));
+            insert(LinkerFlavor::Gnu(cc, LinkerSelection::Wild));
         }
         LinkerFlavor::Darwin(cc, lld) => {
             assert_eq!(lld, LinkerSelection::System);

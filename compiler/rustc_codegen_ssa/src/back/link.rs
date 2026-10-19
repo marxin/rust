@@ -1930,10 +1930,10 @@ pub fn linker_and_flavor(sess: &Session) -> (PathBuf, LinkerFlavor) {
         // Prefer `+wild` over `+lld` feature.
         if features.enabled.contains(LinkerFeatures::WILD) {
             flavor.with_wild_enabled()
-        } else if features.disabled.contains(LinkerFeatures::WILD) {
-            flavor.with_wild_disabled()
         } else if features.enabled.contains(LinkerFeatures::LLD) {
             flavor.with_lld_enabled()
+        } else if features.disabled.contains(LinkerFeatures::WILD) {
+            flavor.with_wild_disabled()
         } else if features.disabled.contains(LinkerFeatures::LLD) {
             flavor.with_lld_disabled()
         } else {

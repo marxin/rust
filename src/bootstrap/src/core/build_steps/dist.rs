@@ -639,6 +639,28 @@ impl CommandLineStep for Rustc {
                 }
             }
 
+            // Copy over Wild if it's there
+            if builder.config.wild_enabled {
+                let src_dir = builder.sysroot_target_bindir(target_compiler, target);
+                let wild = exe("wild", target_compiler.host);
+                builder.copy_link(
+                    &src_dir.join(&wild),
+                    &dst_dir.join(&wild),
+                    FileType::Executable,
+                );
+                let self_contained_wild_src_dir = src_dir.join("gcc-wild");
+                let self_contained_wild_dst_dir = dst_dir.join("gcc-wild");
+                t!(fs::create_dir(&self_contained_wild_dst_dir));
+                for name in WILD_FILE_NAMES {
+                    let exe_name = exe(name, target_compiler.host);
+                    builder.copy_link(
+                        &self_contained_wild_src_dir.join(&exe_name),
+                        &self_contained_wild_dst_dir.join(&exe_name),
+                        FileType::Executable,
+                    );
+                }
+            }
+
             if builder.config.llvm_enabled(target_compiler.host)
                 && builder.config.llvm_tools_enabled
             {
