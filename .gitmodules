@@ -51,3 +51,6 @@
 	path = src/tpde
 	url = https://github.com/rust-lang/tpde.git
 	shallow = true
+[submodule "src/tools/wild"]
+	path = src/tools/wild
+	url = https://github.com/wild-linker/wild.git
