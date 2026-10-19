@@ -800,6 +800,8 @@ bitflags::bitflags! {
         const CC  = 1 << 0;
         /// Use the lld linker, either the system lld or the self-contained linker `rust-lld`.
         const LLD = 1 << 1;
+        /// Use the self-contained Wild linker.
+        const WILD = 1 << 2;
     }
 }
 rustc_data_structures::external_bitflags_debug! { LinkerFeatures }
@@ -810,6 +812,7 @@ impl LinkerFeatures {
         Some(match s {
             "cc" => LinkerFeatures::CC,
             "lld" => LinkerFeatures::LLD,
+            "wild" => LinkerFeatures::WILD,
             _ => return None,
         })
     }
@@ -821,6 +824,7 @@ impl LinkerFeatures {
         Some(match self {
             LinkerFeatures::CC => "cc",
             LinkerFeatures::LLD => "lld",
+            LinkerFeatures::WILD => "wild",
             _ => return None,
         })
     }
