@@ -320,6 +320,8 @@ impl LinkerFlavor {
             Err((Some(Cc::No), Some(LinkerSelection::Lld)))
         } else if stem == "ld" || stem.ends_with("-ld") || stem == "link" {
             Err((Some(Cc::No), Some(LinkerSelection::System)))
+        } else if stem == "wild" {
+            Err((Some(Cc::No), Some(LinkerSelection::Wild)))
         } else {
             Err((None, None))
         }
