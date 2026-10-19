@@ -4163,7 +4163,7 @@ fn add_lld_args(
 
 fn add_wild_args(
     cmd: &mut dyn Linker,
-    _sess: &Session,
+    sess: &Session,
     flavor: LinkerFlavor,
     self_contained_components: LinkSelfContainedComponents,
 ) {
@@ -4178,9 +4178,30 @@ fn add_wild_args(
         return;
     }
 
-    // TODO: use the gcc wrappers trick.
+    // We are intentionally using ld.bfd binary as it's always supported option value and it points
+    // to installed wild binary in `gcc-wild` folder.
+    // The -fuse-ld=wild option got added in GCC 16.
+    let mut linker_path_exists = false;
+    for path in sess.get_tools_search_paths(false) {
+        let linker_path = path.join("gcc-wild");
+        linker_path_exists |= linker_path.exists();
+        cmd.cc_arg({
+            let mut arg = OsString::from("-B");
+            arg.push(linker_path);
+            arg
+        });
+    }
+    if !linker_path_exists {
+        // As a sanity check, we emit an error if none of these paths exist: we want
+        // self-contained linking and have no linker.
+        sess.dcx().emit_fatal(diagnostics::SelfContainedLinkerMissing);
+    }
 
-    cmd.cc_arg("-fuse-ld=wild");
+    // TODO: add clang support
+
+    if !sess.target.is_like_wasm {
+        cmd.cc_arg("-fuse-ld=bfd");
+    }
 }
 
 // gold has been deprecated with binutils 2.44

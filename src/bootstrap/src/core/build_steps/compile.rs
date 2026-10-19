@@ -22,7 +22,9 @@ use tracing::span;
 use crate::core::backend::CodegenBackendKind;
 use crate::core::build_steps::gcc::{Gcc, GccOutput, GccTargetPair};
 use crate::core::build_steps::llvm::{LlvmFromCi, LlvmKind, prebuilt_llvm_output};
-use crate::core::build_steps::tool::{RustcPrivateCompilers, SourceType, copy_lld_artifacts};
+use crate::core::build_steps::tool::{
+    RustcPrivateCompilers, SourceType, copy_lld_artifacts, copy_wild_artifacts,
+};
 use crate::core::build_steps::{dist, llvm};
 use crate::core::builder::{
     self, Builder, Cargo, CommandLineStep, Kind, RunConfig, ShouldRun, Step, StepMetadata,
@@ -2502,18 +2504,6 @@ impl CommandLineStep for Assemble {
             }
         }
 
-        if builder.config.wild_enabled {
-            let wild = builder.ensure(crate::core::build_steps::tool::Wild::for_use_by_compiler(
-                builder,
-                target_compiler,
-            ));
-            builder.copy_link(
-                &wild.tool_path,
-                &libdir_bin.join(wild.tool_path.file_name().unwrap()),
-                FileType::Executable,
-            );
-        }
-
         if builder.config.lld_enabled {
             let lld_wrapper =
                 builder.ensure(crate::core::build_steps::tool::LldWrapper::for_use_by_compiler(
@@ -2521,6 +2511,14 @@ impl CommandLineStep for Assemble {
                     target_compiler,
                 ));
             copy_lld_artifacts(builder, lld_wrapper, target_compiler);
+        }
+
+        if builder.config.wild_enabled {
+            let wild = builder.ensure(crate::core::build_steps::tool::Wild::for_use_by_compiler(
+                builder,
+                target_compiler,
+            ));
+            copy_wild_artifacts(builder, wild, target_compiler);
         }
 
         if builder.config.llvm_enabled(target_compiler.host) && builder.config.llvm_tools_enabled {

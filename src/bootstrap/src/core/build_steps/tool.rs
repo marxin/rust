@@ -14,7 +14,7 @@ use std::path::{Path, PathBuf};
 use std::{env, fs};
 
 use crate::core::build_steps::compile::{CargoMessage, is_lto_stage};
-use crate::core::build_steps::dist::LLD_FILE_NAMES;
+use crate::core::build_steps::dist::{LLD_FILE_NAMES, WILD_FILE_NAMES};
 use crate::core::build_steps::toolstate::ToolState;
 use crate::core::build_steps::{compile, llvm};
 use crate::core::builder::{
@@ -1107,6 +1107,29 @@ impl CommandLineStep for Wild {
 
     fn metadata(&self) -> Option<StepMetadata> {
         Some(StepMetadata::build("Wild", self.target).built_by(self.build_compiler))
+    }
+}
+
+pub(crate) fn copy_wild_artifacts(
+    builder: &Builder<'_>,
+    wild: ToolBuildResult,
+    target_compiler: Compiler,
+) {
+    let target = target_compiler.host;
+    let libdir_bin = builder.sysroot_target_bindir(target_compiler, target);
+    t!(fs::create_dir_all(&libdir_bin));
+
+    builder.copy_link(&wild.tool_path, &libdir_bin.join(exe("wild", target)), FileType::Executable);
+
+    let self_contained_wild_dir = libdir_bin.join("gcc-wild");
+    t!(fs::create_dir_all(&self_contained_wild_dir));
+
+    for name in WILD_FILE_NAMES {
+        builder.copy_link(
+            &wild.tool_path,
+            &self_contained_wild_dir.join(exe(name, target)),
+            FileType::Executable,
+        );
     }
 }
 
