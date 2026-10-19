@@ -300,6 +300,31 @@ pub(crate) fn prepare_needs_conditions(config: &Config) -> PreparedNeedsConditio
             ignore_reason: "ignored on targets without Rust's LLD",
         },
         Need {
+            name: "needs-wild",
+            condition: {
+                // For tests using the `needs-rust-wild` directive we need to find whether `wild`
+                // is present in the compiler under test.
+                //
+                // The --compile-lib-path is the path to host shared libraries, but depends on the OS. For
+                // example:
+                // - on linux, it can be <sysroot>/lib
+                // - on windows, it can be <sysroot>/bin
+                //
+                // However, `wild` is only located under the lib path, so we look for it there.
+                config
+                    .host_compile_lib_path
+                    .parent()
+                    .expect("couldn't traverse to the parent of the specified --compile-lib-path")
+                    .join("lib")
+                    .join("rustlib")
+                    .join(&config.host)
+                    .join("bin")
+                    .join(if config.host.contains("windows") { "wild.exe" } else { "wild" })
+                    .exists()
+            },
+            ignore_reason: "ignored on targets without Rust's Wild",
+        },
+        Need {
             name: "needs-dlltool",
             condition: find_dlltool(config),
             ignore_reason: "ignored when dlltool for the current architecture is not present",

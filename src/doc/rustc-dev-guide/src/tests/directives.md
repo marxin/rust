@@ -181,6 +181,8 @@ The following directives will check rustc build settings and target settings:
 - `needs-unwind` — ignores if the target does not support unwinding
 - `needs-rust-lld` — ignores if the rust lld support is not enabled (`rust.lld =
   true` in `bootstrap.toml`)
+- `needs-wild` — ignores if the rust Wild support is not enabled (`rust.wild =
+  true` in `bootstrap.toml`)
 - `needs-threads` — ignores if the target does not have threading support
 - `needs-subprocess`  — ignores if the target does not have subprocess support
 - `needs-symlink` — ignores if the target does not support symlinks.
