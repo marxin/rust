@@ -181,6 +181,7 @@ pub(crate) struct Config {
 
     pub bootstrap_override_lld: BootstrapOverrideLld,
     pub lld_enabled: bool,
+    pub wild_enabled: bool,
     pub llvm_tools_enabled: bool,
     pub llvm_bitcode_linker_enabled: bool,
 
@@ -599,6 +600,7 @@ impl Config {
             save_toolstates: rust_save_toolstates,
             codegen_backends: rust_codegen_backends,
             lld: rust_lld_enabled,
+            wild: rust_wild_enabled,
             llvm_tools: rust_llvm_tools,
             llvm_bitcode_linker: rust_llvm_bitcode_linker,
             deny_warnings: rust_deny_warnings,
@@ -1487,6 +1489,7 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             libgccjit_libs_dir: gcc_libgccjit_libs_dir,
             library_docs_private_items: build_library_docs_private_items.unwrap_or(false),
             lld_enabled,
+            wild_enabled: rust_wild_enabled.unwrap_or(false),
             lldb: build_lldb,
             llvm_allow_old_toolchain: llvm_allow_old_toolchain.unwrap_or(false),
             llvm_assertions,

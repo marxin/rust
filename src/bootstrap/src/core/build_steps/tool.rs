@@ -1052,6 +1052,65 @@ impl CommandLineStep for WasmComponentLd {
 }
 
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
+pub struct Wild {
+    build_compiler: Compiler,
+    target: TargetSelection,
+}
+
+impl Wild {
+    pub fn for_use_by_compiler(builder: &Builder<'_>, target_compiler: Compiler) -> Self {
+        Self {
+            build_compiler: get_tool_target_compiler(
+                builder,
+                ToolTargetBuildMode::Dist(target_compiler),
+            ),
+            target: target_compiler.host,
+        }
+    }
+}
+
+impl CommandLineStep for Wild {
+    type Output = ToolBuildResult;
+
+    const IS_HOST: bool = true;
+
+    fn should_run(run: ShouldRun<'_>) -> ShouldRun<'_> {
+        run.path("src/tools/wild")
+    }
+
+    fn make_run(run: RunConfig<'_>) {
+        run.builder.ensure(Wild {
+            build_compiler: get_tool_target_compiler(
+                run.builder,
+                ToolTargetBuildMode::Build(run.target),
+            ),
+            target: run.target,
+        });
+    }
+
+    fn run(self, builder: &Builder<'_>) -> ToolBuildResult {
+        builder.sess.require_submodule("src/tools/wild", None);
+
+        builder.ensure(ToolBuild {
+            build_compiler: self.build_compiler,
+            target: self.target,
+            tool: "wild",
+            mode: Mode::ToolTarget,
+            path: "src/tools/wild/wild",
+            source_type: SourceType::Submodule,
+            extra_features: vec![],
+            allow_features: "",
+            cargo_args: vec![],
+            artifact_kind: ToolArtifactKind::Binary,
+        })
+    }
+
+    fn metadata(&self) -> Option<StepMetadata> {
+        Some(StepMetadata::build("Wild", self.target).built_by(self.build_compiler))
+    }
+}
+
+#[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct RustAnalyzer {
     compilers: RustcPrivateCompilers,
 }

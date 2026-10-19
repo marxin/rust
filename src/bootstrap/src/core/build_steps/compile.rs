@@ -2502,6 +2502,18 @@ impl CommandLineStep for Assemble {
             }
         }
 
+        if builder.config.wild_enabled {
+            let wild = builder.ensure(crate::core::build_steps::tool::Wild::for_use_by_compiler(
+                builder,
+                target_compiler,
+            ));
+            builder.copy_link(
+                &wild.tool_path,
+                &libdir_bin.join(wild.tool_path.file_name().unwrap()),
+                FileType::Executable,
+            );
+        }
+
         if builder.config.lld_enabled {
             let lld_wrapper =
                 builder.ensure(crate::core::build_steps::tool::LldWrapper::for_use_by_compiler(

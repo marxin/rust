@@ -815,6 +815,7 @@ impl<'a> Builder<'a> {
                 tool::RustcPerf,
                 tool::WasmComponentLd,
                 tool::LldWrapper,
+                tool::Wild,
             ),
             Kind::Clippy => describe!(
                 clippy::Std,
