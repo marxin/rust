@@ -549,8 +549,6 @@ impl LinkerFeaturesCli {
             ));
         }
 
-        // TODO: add check for +wild
-
         Ok(())
     }
 }
