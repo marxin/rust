@@ -70,7 +70,7 @@ pub(crate) const LLVM_TOOLS: &[&str] = &[
 pub(crate) const LLD_FILE_NAMES: &[&str] = &["ld.lld", "ld64.lld", "lld-link", "wasm-ld"];
 
 /// WILD file names for all flavors (we are using BFD suffix for better GCC option compatibility).
-pub(crate) const WILD_FILE_NAMES: &[&str] = &["ld.bfd", "wasm-ld"];
+pub(crate) const WILD_FILE_NAMES: &[&str] = &["ld.bfd"];
 
 pub fn pkgname(builder: &Builder<'_>, component: &str) -> String {
     format!("{}-{}", component, builder.rust_package_vers())
