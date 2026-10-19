@@ -1,0 +1,2 @@
+error: selected `linker-features` are mutually exclusive: `+lld`, `+wild`
+

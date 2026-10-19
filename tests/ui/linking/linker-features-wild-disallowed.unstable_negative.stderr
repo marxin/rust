@@ -1,0 +1,2 @@
+error: `-C linker-features=-wild` is unstable, and also requires the `-Z unstable-options` flag to be used
+
