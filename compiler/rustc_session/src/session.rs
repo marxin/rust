@@ -28,9 +28,10 @@ use rustc_span::{RealFileName, Span, Symbol};
 use rustc_structures::{CrateType, Limit};
 use rustc_target::asm::InlineAsmArch;
 use rustc_target::spec::{
-    Arch, CfgAbi, CodeModel, DebuginfoKind, LinkerFeatures, MergeFunctions, Os, PanicStrategy,
-    RelocModel, RelroLevel, SanitizerSet, SmallDataThresholdSupport, SplitDebuginfo,
-    StackProtector, SymbolVisibility, Target, TargetTuple, TlsModel, apple,
+    Arch, CfgAbi, CodeModel, DebuginfoKind, LinkerFeatures, LinkerFlavorCli, LinkerSelection,
+    MergeFunctions, Os, PanicStrategy, RelocModel, RelroLevel, SanitizerSet,
+    SmallDataThresholdSupport, SplitDebuginfo, StackProtector, SymbolVisibility, Target,
+    TargetTuple, TlsModel, apple,
 };
 
 use crate::code_stats::CodeStats;
@@ -1812,7 +1813,7 @@ fn validate_commandline_args_with_session_available(sess: &Session) {
                 flavor,
                 LinkerFlavorCli::Gnu(_, LinkerSelection::Wild)
                     | LinkerFlavorCli::Darwin(_, LinkerSelection::Wild)
-                    | LinkerFlavorCli::Msvc(_, LinkerSelection::Wild)
+                    | LinkerFlavorCli::Msvc(LinkerSelection::Wild)
             )
         }))
         && !sess.target.supports_wild
