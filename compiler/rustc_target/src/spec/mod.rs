@@ -171,7 +171,7 @@ impl LinkerFlavorCli {
             | LinkerFlavorCli::Darwin(..)
             | LinkerFlavorCli::WasmLld(..)
             | LinkerFlavorCli::Unix(..)
-            | LinkerFlavorCli::Msvc(LinkerSelection::Lld)
+            | LinkerFlavorCli::Msvc(LinkerSelection::Lld | LinkerSelection::Wild)
             | LinkerFlavorCli::EmCc
             | LinkerFlavorCli::Bpf
             | LinkerFlavorCli::Llbc => true,
@@ -502,17 +502,22 @@ macro_rules! linker_flavor_cli_impls {
 linker_flavor_cli_impls! {
     (LinkerFlavorCli::Gnu(Cc::No, LinkerSelection::System)) "gnu"
     (LinkerFlavorCli::Gnu(Cc::No, LinkerSelection::Lld)) "gnu-lld"
+    (LinkerFlavorCli::Gnu(Cc::No, LinkerSelection::Wild)) "gnu-wild"
     (LinkerFlavorCli::Gnu(Cc::Yes, LinkerSelection::System)) "gnu-cc"
     (LinkerFlavorCli::Gnu(Cc::Yes, LinkerSelection::Lld)) "gnu-lld-cc"
+    (LinkerFlavorCli::Gnu(Cc::Yes, LinkerSelection::Wild)) "gnu-wild-cc"
     (LinkerFlavorCli::Darwin(Cc::No, LinkerSelection::System)) "darwin"
     (LinkerFlavorCli::Darwin(Cc::No, LinkerSelection::Lld)) "darwin-lld"
+    (LinkerFlavorCli::Darwin(Cc::No, LinkerSelection::Wild)) "darwin-wild"
     (LinkerFlavorCli::Darwin(Cc::Yes, LinkerSelection::System)) "darwin-cc"
     (LinkerFlavorCli::Darwin(Cc::Yes, LinkerSelection::Lld)) "darwin-lld-cc"
+    (LinkerFlavorCli::Darwin(Cc::Yes, LinkerSelection::Wild)) "darwin-wild-cc"
     (LinkerFlavorCli::WasmLld(Cc::No)) "wasm-lld"
     (LinkerFlavorCli::WasmLld(Cc::Yes)) "wasm-lld-cc"
     (LinkerFlavorCli::Unix(Cc::No)) "unix"
     (LinkerFlavorCli::Unix(Cc::Yes)) "unix-cc"
     (LinkerFlavorCli::Msvc(LinkerSelection::Lld)) "msvc-lld"
+    (LinkerFlavorCli::Msvc(LinkerSelection::Wild)) "msvc-wild"
     (LinkerFlavorCli::Msvc(LinkerSelection::System)) "msvc"
     (LinkerFlavorCli::EmCc) "em-cc"
     (LinkerFlavorCli::Bpf) "bpf"
