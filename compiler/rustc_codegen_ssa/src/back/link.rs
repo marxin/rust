@@ -1927,6 +1927,7 @@ pub fn linker_and_flavor(sess: &Session) -> (PathBuf, LinkerFlavor) {
         features: LinkerFeaturesCli,
     ) -> LinkerFlavor {
         // Note: a linker feature cannot be both enabled and disabled on the CLI.
+        // Prefer `+wild` over `+lld` feature.
         if features.enabled.contains(LinkerFeatures::WILD) {
             flavor.with_wild_enabled()
         } else if features.disabled.contains(LinkerFeatures::WILD) {

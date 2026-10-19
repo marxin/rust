@@ -2297,6 +2297,7 @@ pub struct TargetOptions {
     /// Default linker flavor used if `-C linker-flavor` or `-C linker` are not passed
     /// on the command line. Defaults to `LinkerFlavor::Gnu(Cc::Yes, Lld::No)`.
     pub linker_flavor: LinkerFlavor,
+    pub supports_wild: bool,
     linker_flavor_json: LinkerFlavorCli,
     lld_flavor_json: LldFlavor,
     linker_is_gnu_json: bool,
@@ -2807,6 +2808,7 @@ impl Default for TargetOptions {
             vendor: "unknown".into(),
             linker: option_env!("CFG_DEFAULT_LINKER").map(|s| s.into()),
             linker_flavor: LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
+            supports_wild: false,
             linker_flavor_json: LinkerFlavorCli::Gcc,
             lld_flavor_json: LldFlavor::Ld,
             linker_is_gnu_json: true,

@@ -16,6 +16,7 @@ pub(crate) fn target() -> Target {
         data_layout: "e-m:e-p:64:64-i64:64-i128:128-n32:64-S128".into(),
         arch: Arch::LoongArch64,
         options: TargetOptions {
+            supports_wild: true,
             code_model: Some(CodeModel::Medium),
             cpu: "generic".into(),
             features: "+f,+d,+lsx,+relax".into(),

@@ -672,6 +672,10 @@ pub(crate) struct IncompatibleLinkerFlavor {
 }
 
 #[derive(Diagnostic)]
+#[diag("the Wild linker does not support the current target")]
+pub(crate) struct UnsupportedWildTarget;
+
+#[derive(Diagnostic)]
 #[diag("`-Zfunction-return` (except `keep`) is only supported on x86 and x86_64")]
 pub(crate) struct FunctionReturnRequiresX86OrX8664;
 

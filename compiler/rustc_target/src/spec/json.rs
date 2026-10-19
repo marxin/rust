@@ -75,6 +75,7 @@ impl Target {
         forward!(vendor);
         forward_opt!(linker);
         forward!(linker_flavor_json);
+        forward!(supports_wild);
         forward!(lld_flavor_json);
         forward!(linker_is_gnu_json);
         forward!(pre_link_objects);
@@ -305,6 +306,7 @@ impl ToJson for Target {
         target_option_val!(vendor);
         target_option_val!(linker);
         target_option_val!(linker_flavor_json, "linker-flavor");
+        target_option_val!(supports_wild);
         target_option_val!(lld_flavor_json, "lld-flavor");
         target_option_val!(linker_is_gnu_json, "linker-is-gnu");
         target_option_val!(pre_link_objects);
@@ -514,6 +516,7 @@ struct TargetSpecJson {
     linker: Option<StaticCow<str>>,
     #[serde(rename = "linker-flavor")]
     linker_flavor_json: Option<LinkerFlavorCli>,
+    supports_wild: Option<bool>,
     #[serde(rename = "lld-flavor")]
     lld_flavor_json: Option<LldFlavor>,
     #[serde(rename = "linker-is-gnu")]

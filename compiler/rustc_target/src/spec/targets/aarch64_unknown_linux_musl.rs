@@ -5,6 +5,7 @@ use crate::spec::{
 
 pub(crate) fn target() -> Target {
     let mut base = base::linux_musl::opts();
+    base.supports_wild = true;
     base.max_atomic_width = Some(128);
     base.supports_xray = true;
     base.features = "+v8a,+outline-atomics".into();

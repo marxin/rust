@@ -16,6 +16,7 @@ pub(crate) fn target() -> Target {
         data_layout: "e-m:e-p270:32:32-p271:32:32-p272:64:64-i8:8:32-i16:16:32-i64:64-i128:128-n32:64-S128-Fn32".into(),
         arch: Arch::AArch64,
         options: TargetOptions {
+            supports_wild: true,
             // Enable the Cortex-A53 errata 843419 mitigation by default
             pre_link_args: TargetOptions::link_args(
                 LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
