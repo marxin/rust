@@ -16,7 +16,6 @@ pub(crate) use shim_utils::{dylib_path, dylib_path_var};
 
 pub(crate) use self::macros::t;
 use crate::core::builder::{Builder, StepStack};
-use crate::core::compiler::Compiler;
 use crate::core::config::{BootstrapOverrideLld, Config, TargetSelection};
 use crate::utils::exec::{BootstrapCommand, command};
 
@@ -435,11 +434,10 @@ pub enum LldThreads {
 /// Returns the linker arguments for rustc/rustdoc for the given builder and target.
 pub fn linker_args(
     builder: &Builder<'_>,
-    compiler: Compiler,
     target: TargetSelection,
     lld_threads: LldThreads,
 ) -> Vec<String> {
-    let mut args = linker_flags(builder, compiler, target, lld_threads);
+    let mut args = linker_flags(builder, target, lld_threads);
 
     if let Some(linker) = builder.linker(target) {
         args.push(format!("-Clinker={}", linker.display()));
@@ -452,17 +450,10 @@ pub fn linker_args(
 /// -Clinker flag.
 pub fn linker_flags(
     builder: &Builder<'_>,
-    compiler: Compiler,
     target: TargetSelection,
     lld_threads: LldThreads,
 ) -> Vec<String> {
     let mut args = vec![];
-    if builder.config.bootstrap_override_wild && compiler.stage >= 2 {
-        // TODO: remove stage >= 2 once the option will get into beta compiler
-        args.push("-Clinker-features=+wild".to_string());
-        args.push("-Zunstable-options".to_string());
-        return args;
-    }
     if !builder.is_lld_direct_linker(target) && builder.config.bootstrap_override_lld.is_used() {
         match builder.config.bootstrap_override_lld {
             BootstrapOverrideLld::External => {
@@ -495,11 +486,10 @@ pub fn linker_flags(
 pub fn add_rustdoc_cargo_linker_args(
     cmd: &mut BootstrapCommand,
     builder: &Builder<'_>,
-    compiler: Compiler,
     target: TargetSelection,
     lld_threads: LldThreads,
 ) {
-    let args = linker_args(builder, compiler, target, lld_threads);
+    let args = linker_args(builder, target, lld_threads);
     let mut flags = cmd
         .get_envs()
         .find_map(|(k, v)| if k == OsStr::new("RUSTDOCFLAGS") { v } else { None })

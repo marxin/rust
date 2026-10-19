@@ -180,7 +180,6 @@ pub(crate) struct Config {
     pub llvm_tpde: bool,
 
     pub bootstrap_override_lld: BootstrapOverrideLld,
-    pub bootstrap_override_wild: bool,
     pub lld_enabled: bool,
     pub wild_enabled: bool,
     pub llvm_tools_enabled: bool,
@@ -626,7 +625,6 @@ impl Config {
             stack_protector: rust_stack_protector,
             strip: rust_strip,
             bootstrap_override_lld: rust_bootstrap_override_lld,
-            bootstrap_override_wild: rust_bootstrap_override_wild,
             std_features: rust_std_features,
             break_on_ice: rust_break_on_ice,
             rustflags: rust_rustflags,
@@ -749,12 +747,6 @@ impl Config {
         let pgo_cranelift = init_pgo(pgo_cranelift, "cranelift");
 
         let bootstrap_override_lld = rust_bootstrap_override_lld.unwrap_or_default();
-        let bootstrap_override_wild = rust_bootstrap_override_wild.unwrap_or(false);
-        if bootstrap_override_wild && bootstrap_override_lld.is_used() {
-            panic!(
-                "Cannot enable `bootstrap-override-wild` and `bootstrap-override-lld` at the same time"
-            );
-        }
 
         if rust_optimize.as_ref().is_some_and(|v| matches!(v, RustOptimize::Bool(false))) {
             eprintln!(
@@ -1429,7 +1421,6 @@ NOTE: Please add `--stage 2` to your command line, or if you're sure you want to
             bindir: install_bindir.map(PathBuf::from).unwrap_or("bin".into()),
             bootstrap_cache_path: build_bootstrap_cache_path,
             bootstrap_override_lld,
-            bootstrap_override_wild,
             bypass_bootstrap_lock: flags_bypass_bootstrap_lock,
             cargo_info,
             cargo_native_static: build_cargo_native_static.unwrap_or(false),
