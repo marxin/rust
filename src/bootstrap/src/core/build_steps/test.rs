@@ -353,7 +353,13 @@ impl CommandLineStep for Cargotest {
             .args(builder.config.test_args())
             .env("RUSTC", builder.rustc(tested_compiler))
             .env("RUSTDOC", builder.rustdoc_for_compiler(tested_compiler));
-        add_rustdoc_cargo_linker_args(&mut cmd, builder, tested_compiler.host, LldThreads::No);
+        add_rustdoc_cargo_linker_args(
+            &mut cmd,
+            builder,
+            tested_compiler,
+            tested_compiler.host,
+            LldThreads::No,
+        );
         cmd.delay_failure().run(builder);
     }
 
@@ -1456,7 +1462,7 @@ impl CommandLineStep for RustdocTheme {
             .env("CFG_RELEASE_CHANNEL", &builder.config.channel)
             .env("RUSTDOC_REAL", builder.rustdoc_for_compiler(self.test_compiler))
             .env("RUSTC_BOOTSTRAP", "1");
-        cmd.args(linker_args(builder, self.test_compiler.host, LldThreads::No));
+        cmd.args(linker_args(builder, self.test_compiler, self.test_compiler.host, LldThreads::No));
 
         cmd.delay_failure().run(builder);
     }
@@ -1671,7 +1677,13 @@ impl CommandLineStep for RustdocGUI {
         cmd.env("RUSTDOC", builder.rustdoc_for_compiler(self.test_compiler))
             .env("RUSTC", builder.rustc(self.test_compiler));
 
-        add_rustdoc_cargo_linker_args(&mut cmd, builder, self.test_compiler.host, LldThreads::No);
+        add_rustdoc_cargo_linker_args(
+            &mut cmd,
+            builder,
+            self.test_compiler,
+            self.test_compiler.host,
+            LldThreads::No,
+        );
 
         let full_suite = builder.paths.iter().any(|path| {
             matches!(
@@ -2708,7 +2720,7 @@ Please disable assertions with `rust.debug-assertions = false`.
         }
 
         let mut hostflags = flags.clone();
-        hostflags.extend(linker_flags(builder, test_compiler.host, LldThreads::No));
+        hostflags.extend(linker_flags(builder, test_compiler, test_compiler.host, LldThreads::No));
 
         let mut targetflags = flags;
 

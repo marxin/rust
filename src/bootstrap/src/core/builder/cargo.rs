@@ -377,7 +377,7 @@ impl Cargo {
             let host = envify(&compiler.host.triple);
             self.command.env(format!("CARGO_TARGET_{host}_LINKER"), host_linker);
         }
-        for arg in linker_flags(builder, compiler.host, LldThreads::Yes) {
+        for arg in linker_flags(builder, compiler, compiler.host, LldThreads::Yes) {
             self.hostflags.arg(&arg);
         }
 
@@ -387,10 +387,10 @@ impl Cargo {
         }
         // We want to set -Clinker using Cargo, therefore we only call `linker_flags` and not
         // `linker_args` here. Cargo will pass that to both rustc and rustdoc invocations.
-        for flag in linker_flags(builder, target, LldThreads::Yes) {
+        for flag in linker_flags(builder, compiler, target, LldThreads::Yes) {
             self.rustflags.arg(&flag);
         }
-        for arg in linker_flags(builder, target, LldThreads::Yes) {
+        for arg in linker_flags(builder, compiler, target, LldThreads::Yes) {
             self.rustdocflags.arg(&arg);
         }
 
