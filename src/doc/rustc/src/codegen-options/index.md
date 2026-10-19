@@ -308,6 +308,9 @@ Currently only one is stable, and only on the `x86_64-unknown-linux-gnu` target:
 - `lld`: to toggle trying to use the lld linker, either the system-installed binary, or the self-contained
   `rust-lld` linker (via the [`-Clink-self-contained=+linker`](#link-self-contained) flag).
 
+The nightly channel supports also:
+- `-Clinker-features=+wild` to opt into using the Wild linker, when available (see the Implementation notes below)
+
 For example, use:
 - `-Clinker-features=+lld` to opt into using the `lld` linker, when possible (see the Implementation notes below)
 - `-Clinker-features=-lld` to opt out instead, for targets where it is configured as the default linker
@@ -325,6 +328,9 @@ as a fallback.
 
 If the user _also_ passes a `-Clink-arg=-fuse-ld=$value`, both will be given to the linker
 driver but the user's will be passed last, and would generally have priority over `rustc`'s.
+
+The Wild linker currently supports the following Linux targets: `x86_64`, `aarch64`, `riscv64gc` and
+`loongarch64`.
 
 ## linker-flavor
 
