@@ -1,26 +1,26 @@
 use std::borrow::Cow;
 
 use crate::spec::{
-    BinaryFormat, Cc, DebuginfoKind, LinkerFlavor, Lld, Os, SplitDebuginfo, TargetOptions,
+    BinaryFormat, Cc, DebuginfoKind, LinkerFlavor, LinkerSelection, Os, SplitDebuginfo, TargetOptions,
     TlsModel, cvs,
 };
 
 pub(crate) fn opts() -> TargetOptions {
     let mut pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &["--disable-dynamicbase", "--enable-auto-image-base"],
     );
     crate::spec::add_link_args(
         &mut pre_link_args,
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &["-Wl,--disable-dynamicbase", "-Wl,--enable-auto-image-base"],
     );
     let cygwin_libs = &["-lcygwin", "-lgcc", "-lcygwin", "-luser32", "-lkernel32", "-lgcc_s"];
     let mut late_link_args =
-        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), cygwin_libs);
+        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), cygwin_libs);
     crate::spec::add_link_args(
         &mut late_link_args,
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         cygwin_libs,
     );
     TargetOptions {

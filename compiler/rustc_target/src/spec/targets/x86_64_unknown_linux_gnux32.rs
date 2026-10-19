@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, CfgAbi, LinkerFlavor, Lld, StackProbeType, Target, TargetMetadata, base,
+    Arch, Cc, CfgAbi, LinkerFlavor, LinkerSelection, StackProbeType, Target, TargetMetadata, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -7,7 +7,7 @@ pub(crate) fn target() -> Target {
     base.cpu = "x86-64".into();
     base.cfg_abi = CfgAbi::X32;
     base.max_atomic_width = Some(64);
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-mx32"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-mx32"]);
     base.stack_probes = StackProbeType::Inline;
     base.has_thread_local = false;
     // BUG(GabrielMajeri): disabling the PLT on x86_64 Linux with x32 ABI

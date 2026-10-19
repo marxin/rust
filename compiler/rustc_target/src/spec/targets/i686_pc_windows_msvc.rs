@@ -1,4 +1,4 @@
-use crate::spec::{Arch, LinkerFlavor, Lld, RustcAbi, SanitizerSet, Target, TargetMetadata, base};
+use crate::spec::{Arch, LinkerFlavor, LinkerSelection, RustcAbi, SanitizerSet, Target, TargetMetadata, base};
 
 pub(crate) fn target() -> Target {
     let mut base = base::windows_msvc::opts();
@@ -8,7 +8,7 @@ pub(crate) fn target() -> Target {
     base.supported_sanitizers = SanitizerSet::ADDRESS;
 
     base.add_pre_link_args(
-        LinkerFlavor::Msvc(Lld::No),
+        LinkerFlavor::Msvc(LinkerSelection::System),
         &[
             // Mark all dynamic libraries and executables as compatible with the larger 4GiB address
             // space available to x86 Windows binaries on x86_64.

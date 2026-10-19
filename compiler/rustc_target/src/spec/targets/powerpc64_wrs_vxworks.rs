@@ -1,14 +1,14 @@
 use rustc_abi::Endian;
 
 use crate::spec::{
-    Arch, Cc, CfgAbi, LinkerFlavor, Lld, LlvmAbi, StackProbeType, Target, TargetMetadata,
+    Arch, Cc, CfgAbi, LinkerFlavor, LinkerSelection, LlvmAbi, StackProbeType, Target, TargetMetadata,
     TargetOptions, base,
 };
 
 pub(crate) fn target() -> Target {
     let mut base = base::vxworks::opts();
     base.cpu = "ppc64".into();
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64"]);
     base.max_atomic_width = Some(64);
     base.stack_probes = StackProbeType::Inline;
     base.cfg_abi = CfgAbi::ElfV1;

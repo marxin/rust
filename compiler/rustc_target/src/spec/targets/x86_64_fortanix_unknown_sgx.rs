@@ -1,12 +1,12 @@
 use std::borrow::Cow;
 
 use crate::spec::{
-    Arch, Cc, CfgAbi, Env, LinkerFlavor, Lld, Os, Target, TargetMetadata, TargetOptions, cvs,
+    Arch, Cc, CfgAbi, Env, LinkerFlavor, LinkerSelection, Os, Target, TargetMetadata, TargetOptions, cvs,
 };
 
 pub(crate) fn target() -> Target {
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &[
             "-e",
             "elf_entry",
@@ -61,7 +61,7 @@ pub(crate) fn target() -> Target {
         env: Env::Sgx,
         vendor: "fortanix".into(),
         cfg_abi: CfgAbi::Fortanix,
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         max_atomic_width: Some(64),
         cpu: "x86-64".into(),

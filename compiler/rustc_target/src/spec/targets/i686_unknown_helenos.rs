@@ -1,11 +1,11 @@
-use crate::spec::{Arch, Cc, LinkerFlavor, Lld, RustcAbi, Target, base};
+use crate::spec::{Arch, Cc, LinkerFlavor, LinkerSelection, RustcAbi, Target, base};
 
 pub(crate) fn target() -> Target {
     let mut base = base::helenos::opts();
     base.cpu = "pentium4".into();
     base.max_atomic_width = Some(64);
     base.linker = Some("i686-helenos-gcc".into());
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m32"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m32"]);
     base.rustc_abi = Some(RustcAbi::X86Sse2);
 
     Target {

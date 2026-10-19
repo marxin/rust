@@ -1,11 +1,11 @@
 // These are the baseline settings for 32-bit bare-metal Arm targets using the EABI or EABIHF ABI.
 
-use crate::spec::{Cc, FramePointer, LinkerFlavor, Lld, PanicStrategy, RelocModel, TargetOptions};
+use crate::spec::{Cc, FramePointer, LinkerFlavor, LinkerSelection, PanicStrategy, RelocModel, TargetOptions};
 
 pub(crate) fn opts() -> TargetOptions {
     // See rust-lang/rfcs#1645 for a discussion about these defaults
     TargetOptions {
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         // In most cases, LLD is good enough
         linker: Some("rust-lld".into()),
         // Because these devices have very little resources having an unwinder is too onerous so we

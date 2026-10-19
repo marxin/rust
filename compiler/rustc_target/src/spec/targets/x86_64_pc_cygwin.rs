@@ -1,10 +1,10 @@
-use crate::spec::{Arch, Cc, LinkerFlavor, Lld, Target, base};
+use crate::spec::{Arch, Cc, LinkerFlavor, LinkerSelection, Target, base};
 
 pub(crate) fn target() -> Target {
     let mut base = base::cygwin::opts();
     base.cpu = "x86-64".into();
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), &["-m", "i386pep"]);
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), &["-m", "i386pep"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64"]);
     base.max_atomic_width = Some(64);
     base.linker = Some("x86_64-pc-cygwin-gcc".into());
     Target {

@@ -1,4 +1,4 @@
-use crate::spec::{Arch, Cc, LinkerFlavor, Lld, Target, base};
+use crate::spec::{Arch, Cc, LinkerFlavor, LinkerSelection, Target, base};
 
 pub(crate) fn target() -> Target {
     let mut base = base::helenos::opts();
@@ -6,7 +6,7 @@ pub(crate) fn target() -> Target {
     base.plt_by_default = false;
     base.max_atomic_width = Some(64);
     base.linker = Some("amd64-helenos-gcc".into());
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64"]);
 
     Target {
         llvm_target: "x86_64-unknown-helenos".into(),

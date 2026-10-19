@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, RustcAbi, StackProbeType, Target, TargetMetadata, base,
+    Arch, Cc, LinkerFlavor, LinkerSelection, RustcAbi, StackProbeType, Target, TargetMetadata, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -7,7 +7,7 @@ pub(crate) fn target() -> Target {
     base.rustc_abi = Some(RustcAbi::X86Sse2);
     base.cpu = "pentium4".into();
     base.max_atomic_width = Some(64);
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m32", "-Wl,-znotext"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m32", "-Wl,-znotext"]);
     base.stack_probes = StackProbeType::Inline;
 
     Target {

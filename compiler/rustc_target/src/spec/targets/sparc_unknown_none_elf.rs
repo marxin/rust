@@ -1,12 +1,12 @@
 use rustc_abi::Endian;
 
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, PanicStrategy, RelocModel, Target, TargetMetadata, TargetOptions,
+    Arch, Cc, LinkerFlavor, LinkerSelection, PanicStrategy, RelocModel, Target, TargetMetadata, TargetOptions,
 };
 
 pub(crate) fn target() -> Target {
     let options = TargetOptions {
-        linker_flavor: LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        linker_flavor: LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         linker: Some("sparc-elf-gcc".into()),
         endian: Endian::Big,
         cpu: "v7".into(),

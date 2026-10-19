@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, PanicStrategy, StackProbeType, Target, TargetMetadata, base,
+    Arch, Cc, LinkerFlavor, LinkerSelection, PanicStrategy, StackProbeType, Target, TargetMetadata, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -7,7 +7,7 @@ pub(crate) fn target() -> Target {
     base.cpu = "x86-64".into();
     base.max_atomic_width = Some(64);
     base.stack_probes = StackProbeType::Inline;
-    base.linker_flavor = LinkerFlavor::Gnu(Cc::No, Lld::Yes);
+    base.linker_flavor = LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld);
     base.linker = Some("rust-lld".into());
     base.panic_strategy = PanicStrategy::Abort;
     base.supports_fentry = true;

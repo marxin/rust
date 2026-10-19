@@ -1,10 +1,10 @@
 use crate::spec::{
-    Cc, FramePointer, LinkerFlavor, Lld, Os, PanicStrategy, StackProbeType, TargetOptions,
+    Cc, FramePointer, LinkerFlavor, LinkerSelection, Os, PanicStrategy, StackProbeType, TargetOptions,
 };
 
 pub(crate) fn opts() -> TargetOptions {
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &["-e", "motor_start", "-u", "__rust_abort"],
     );
     TargetOptions {
@@ -15,7 +15,7 @@ pub(crate) fn opts() -> TargetOptions {
         // We use "OS level" TLS (see thread/local.rs in stdlib).
         has_thread_local: false,
         frame_pointer: FramePointer::NonLeaf,
-        linker_flavor: LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        linker_flavor: LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         main_needs_argc_argv: true,
         panic_strategy: PanicStrategy::Abort,
         pre_link_args,

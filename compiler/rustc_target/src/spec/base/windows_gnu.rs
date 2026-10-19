@@ -1,13 +1,13 @@
 use std::borrow::Cow;
 
 use crate::spec::{
-    BinaryFormat, Cc, DebuginfoKind, Env, LinkSelfContainedDefault, LinkerFlavor, Lld, Os,
+    BinaryFormat, Cc, DebuginfoKind, Env, LinkSelfContainedDefault, LinkerFlavor, LinkerSelection, Os,
     SplitDebuginfo, TargetOptions, add_link_args, crt_objects, cvs,
 };
 
 pub(crate) fn opts() -> TargetOptions {
     let mut pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &[
             // Enable ASLR
             "--dynamicbase",
@@ -17,7 +17,7 @@ pub(crate) fn opts() -> TargetOptions {
     );
     add_link_args(
         &mut pre_link_args,
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &[
             // Tell GCC to avoid linker plugins, because we are not bundling
             // them with Windows installer, and Rust does its own LTO anyways.
@@ -49,17 +49,17 @@ pub(crate) fn opts() -> TargetOptions {
         "-lkernel32",
     ];
     let mut late_link_args =
-        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), mingw_libs);
-    add_link_args(&mut late_link_args, LinkerFlavor::Gnu(Cc::Yes, Lld::No), mingw_libs);
+        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), mingw_libs);
+    add_link_args(&mut late_link_args, LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), mingw_libs);
     // If any of our crates are dynamically linked then we need to use
     // the shared libgcc_s-dw2-1.dll. This is required to support
     // unwinding across DLL boundaries.
     let dynamic_unwind_libs = &["-lgcc_s"];
     let mut late_link_args_dynamic =
-        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), dynamic_unwind_libs);
+        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), dynamic_unwind_libs);
     add_link_args(
         &mut late_link_args_dynamic,
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         dynamic_unwind_libs,
     );
     // If all of our crates are statically linked then we can get away
@@ -69,10 +69,10 @@ pub(crate) fn opts() -> TargetOptions {
     // boundaries when unwinding across FFI boundaries.
     let static_unwind_libs = &["-lgcc_eh", "-l:libpthread.a"];
     let mut late_link_args_static =
-        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), static_unwind_libs);
+        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), static_unwind_libs);
     add_link_args(
         &mut late_link_args_static,
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         static_unwind_libs,
     );
 

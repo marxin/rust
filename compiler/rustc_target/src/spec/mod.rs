@@ -82,11 +82,12 @@ pub enum Cc {
     No,
 }
 
-/// Linker is LLD.
+/// Used linker.
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub enum Lld {
-    Yes,
-    No,
+pub enum LinkerSelection {
+    Lld,
+    Wild,
+    System,
 }
 
 /// All linkers have some kinds of command line interfaces and rustc needs to know which commands
@@ -114,10 +115,10 @@ pub enum LinkerFlavor {
     /// Unix-like linker with GNU extensions (both naked and compiler-wrapped forms).
     /// Besides similar "default" Linux/BSD linkers this also includes Windows/GNU linker,
     /// which is somewhat different because it doesn't produce ELFs.
-    Gnu(Cc, Lld),
+    Gnu(Cc, LinkerSelection),
     /// Unix-like linker for Apple targets (both naked and compiler-wrapped forms).
     /// Extracted from the "umbrella" `Unix` flavor due to its corresponding LLD flavor.
-    Darwin(Cc, Lld),
+    Darwin(Cc, LinkerSelection),
     /// Unix-like linker for Wasm targets (both naked and compiler-wrapped forms).
     /// Extracted from the "umbrella" `Unix` flavor due to its corresponding LLD flavor.
     /// Non-LLD version does not exist, so the lld flag is currently hardcoded here.
@@ -127,7 +128,7 @@ pub enum LinkerFlavor {
     /// LLD doesn't support any of these.
     Unix(Cc),
     /// MSVC-style linker for Windows and UEFI, LLD supports it.
-    Msvc(Lld),
+    Msvc(LinkerSelection),
     /// Emscripten Compiler Frontend, a wrapper around `WasmLld(Cc::Yes)` that has a different
     /// interface and produces some additional JavaScript output.
     EmCc,
@@ -145,12 +146,12 @@ pub enum LinkerFlavor {
 #[derive(Clone, Copy, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum LinkerFlavorCli {
     // Modern (unstable) flavors, with direct counterparts in `LinkerFlavor`.
-    Gnu(Cc, Lld),
-    Darwin(Cc, Lld),
+    Gnu(Cc, LinkerSelection),
+    Darwin(Cc, LinkerSelection),
     WasmLld(Cc),
     Unix(Cc),
     // Note: `Msvc(Lld::No)` is also a stable value.
-    Msvc(Lld),
+    Msvc(LinkerSelection),
     EmCc,
     Bpf,
     Llbc,
@@ -170,14 +171,14 @@ impl LinkerFlavorCli {
             | LinkerFlavorCli::Darwin(..)
             | LinkerFlavorCli::WasmLld(..)
             | LinkerFlavorCli::Unix(..)
-            | LinkerFlavorCli::Msvc(Lld::Yes)
+            | LinkerFlavorCli::Msvc(LinkerSelection::Lld)
             | LinkerFlavorCli::EmCc
             | LinkerFlavorCli::Bpf
             | LinkerFlavorCli::Llbc => true,
             LinkerFlavorCli::Gcc
             | LinkerFlavorCli::Ld
             | LinkerFlavorCli::Lld(..)
-            | LinkerFlavorCli::Msvc(Lld::No)
+            | LinkerFlavorCli::Msvc(LinkerSelection::System)
             | LinkerFlavorCli::Em => false,
         }
     }
@@ -212,20 +213,22 @@ impl LinkerFlavor {
 
             // Below: legacy stable values
             LinkerFlavorCli::Gcc => match lld_flavor {
-                LldFlavor::Ld if is_gnu => LinkerFlavor::Gnu(Cc::Yes, Lld::No),
-                LldFlavor::Ld64 => LinkerFlavor::Darwin(Cc::Yes, Lld::No),
+                LldFlavor::Ld if is_gnu => LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
+                LldFlavor::Ld64 => LinkerFlavor::Darwin(Cc::Yes, LinkerSelection::System),
                 LldFlavor::Wasm => LinkerFlavor::WasmLld(Cc::Yes),
                 LldFlavor::Ld | LldFlavor::Link => LinkerFlavor::Unix(Cc::Yes),
             },
             LinkerFlavorCli::Ld => match lld_flavor {
-                LldFlavor::Ld if is_gnu => LinkerFlavor::Gnu(Cc::No, Lld::No),
-                LldFlavor::Ld64 => LinkerFlavor::Darwin(Cc::No, Lld::No),
+                LldFlavor::Ld if is_gnu => LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
+                LldFlavor::Ld64 => LinkerFlavor::Darwin(Cc::No, LinkerSelection::System),
                 LldFlavor::Ld | LldFlavor::Wasm | LldFlavor::Link => LinkerFlavor::Unix(Cc::No),
             },
-            LinkerFlavorCli::Lld(LldFlavor::Ld) => LinkerFlavor::Gnu(Cc::No, Lld::Yes),
-            LinkerFlavorCli::Lld(LldFlavor::Ld64) => LinkerFlavor::Darwin(Cc::No, Lld::Yes),
+            LinkerFlavorCli::Lld(LldFlavor::Ld) => LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
+            LinkerFlavorCli::Lld(LldFlavor::Ld64) => {
+                LinkerFlavor::Darwin(Cc::No, LinkerSelection::Lld)
+            }
             LinkerFlavorCli::Lld(LldFlavor::Wasm) => LinkerFlavor::WasmLld(Cc::No),
-            LinkerFlavorCli::Lld(LldFlavor::Link) => LinkerFlavor::Msvc(Lld::Yes),
+            LinkerFlavorCli::Lld(LldFlavor::Link) => LinkerFlavor::Msvc(LinkerSelection::Lld),
             LinkerFlavorCli::Em => LinkerFlavor::EmCc,
         }
     }
@@ -237,14 +240,14 @@ impl LinkerFlavor {
             | LinkerFlavor::Darwin(Cc::Yes, _)
             | LinkerFlavor::WasmLld(Cc::Yes)
             | LinkerFlavor::Unix(Cc::Yes) => LinkerFlavorCli::Gcc,
-            LinkerFlavor::Gnu(_, Lld::Yes) => LinkerFlavorCli::Lld(LldFlavor::Ld),
-            LinkerFlavor::Darwin(_, Lld::Yes) => LinkerFlavorCli::Lld(LldFlavor::Ld64),
+            LinkerFlavor::Gnu(_, LinkerSelection::Lld) => LinkerFlavorCli::Lld(LldFlavor::Ld),
+            LinkerFlavor::Darwin(_, LinkerSelection::Lld) => LinkerFlavorCli::Lld(LldFlavor::Ld64),
             LinkerFlavor::WasmLld(..) => LinkerFlavorCli::Lld(LldFlavor::Wasm),
             LinkerFlavor::Gnu(..) | LinkerFlavor::Darwin(..) | LinkerFlavor::Unix(..) => {
                 LinkerFlavorCli::Ld
             }
-            LinkerFlavor::Msvc(Lld::Yes) => LinkerFlavorCli::Lld(LldFlavor::Link),
-            LinkerFlavor::Msvc(..) => LinkerFlavorCli::Msvc(Lld::No),
+            LinkerFlavor::Msvc(LinkerSelection::Lld) => LinkerFlavorCli::Lld(LldFlavor::Link),
+            LinkerFlavor::Msvc(..) => LinkerFlavorCli::Msvc(LinkerSelection::System),
             LinkerFlavor::EmCc => LinkerFlavorCli::Em,
             LinkerFlavor::Bpf => LinkerFlavorCli::Bpf,
             LinkerFlavor::Llbc => LinkerFlavorCli::Llbc,
@@ -265,27 +268,29 @@ impl LinkerFlavor {
         }
     }
 
-    fn infer_cli_hints(cli: LinkerFlavorCli) -> (Option<Cc>, Option<Lld>) {
+    fn infer_cli_hints(cli: LinkerFlavorCli) -> (Option<Cc>, Option<LinkerSelection>) {
         match cli {
             LinkerFlavorCli::Gnu(cc, lld) | LinkerFlavorCli::Darwin(cc, lld) => {
                 (Some(cc), Some(lld))
             }
-            LinkerFlavorCli::WasmLld(cc) => (Some(cc), Some(Lld::Yes)),
+            LinkerFlavorCli::WasmLld(cc) => (Some(cc), Some(LinkerSelection::Lld)),
             LinkerFlavorCli::Unix(cc) => (Some(cc), None),
             LinkerFlavorCli::Msvc(lld) => (Some(Cc::No), Some(lld)),
-            LinkerFlavorCli::EmCc => (Some(Cc::Yes), Some(Lld::Yes)),
+            LinkerFlavorCli::EmCc => (Some(Cc::Yes), Some(LinkerSelection::Lld)),
             LinkerFlavorCli::Bpf => (None, None),
             LinkerFlavorCli::Llbc => (None, None),
 
             // Below: legacy stable values
             LinkerFlavorCli::Gcc => (Some(Cc::Yes), None),
-            LinkerFlavorCli::Ld => (Some(Cc::No), Some(Lld::No)),
-            LinkerFlavorCli::Lld(_) => (Some(Cc::No), Some(Lld::Yes)),
-            LinkerFlavorCli::Em => (Some(Cc::Yes), Some(Lld::Yes)),
+            LinkerFlavorCli::Ld => (Some(Cc::No), Some(LinkerSelection::System)),
+            LinkerFlavorCli::Lld(_) => (Some(Cc::No), Some(LinkerSelection::Lld)),
+            LinkerFlavorCli::Em => (Some(Cc::Yes), Some(LinkerSelection::Lld)),
         }
     }
 
-    fn infer_linker_hints(linker_stem: &str) -> Result<Self, (Option<Cc>, Option<Lld>)> {
+    fn infer_linker_hints(
+        linker_stem: &str,
+    ) -> Result<Self, (Option<Cc>, Option<LinkerSelection>)> {
         // Remove any version postfix.
         let stem = linker_stem
             .rsplit_once('-')
@@ -304,7 +309,7 @@ impl LinkerFlavor {
             || stem == "clang++"
             || stem.ends_with("-clang++")
         {
-            Err((Some(Cc::Yes), Some(Lld::No)))
+            Err((Some(Cc::Yes), Some(LinkerSelection::System)))
         } else if stem == "wasm-ld"
             || stem.ends_with("-wasm-ld")
             || stem == "ld.lld"
@@ -312,15 +317,18 @@ impl LinkerFlavor {
             || stem == "rust-lld"
             || stem == "lld-link"
         {
-            Err((Some(Cc::No), Some(Lld::Yes)))
+            Err((Some(Cc::No), Some(LinkerSelection::Lld)))
         } else if stem == "ld" || stem.ends_with("-ld") || stem == "link" {
-            Err((Some(Cc::No), Some(Lld::No)))
+            Err((Some(Cc::No), Some(LinkerSelection::System)))
         } else {
             Err((None, None))
         }
     }
 
-    fn with_hints(self, (cc_hint, lld_hint): (Option<Cc>, Option<Lld>)) -> LinkerFlavor {
+    fn with_hints(
+        self,
+        (cc_hint, lld_hint): (Option<Cc>, Option<LinkerSelection>),
+    ) -> LinkerFlavor {
         match self {
             LinkerFlavor::Gnu(cc, lld) => {
                 LinkerFlavor::Gnu(cc_hint.unwrap_or(cc), lld_hint.unwrap_or(lld))
@@ -396,11 +404,11 @@ impl LinkerFlavor {
     pub fn uses_lld(self) -> bool {
         // Exhaustive match in case new flavors are added in the future.
         match self {
-            LinkerFlavor::Gnu(_, Lld::Yes)
-            | LinkerFlavor::Darwin(_, Lld::Yes)
+            LinkerFlavor::Gnu(_, LinkerSelection::Lld)
+            | LinkerFlavor::Darwin(_, LinkerSelection::Lld)
             | LinkerFlavor::WasmLld(..)
             | LinkerFlavor::EmCc
-            | LinkerFlavor::Msvc(Lld::Yes) => true,
+            | LinkerFlavor::Msvc(LinkerSelection::Lld) => true,
             LinkerFlavor::Gnu(..)
             | LinkerFlavor::Darwin(..)
             | LinkerFlavor::Msvc(_)
@@ -433,9 +441,13 @@ impl LinkerFlavor {
     /// flavor unmodified.
     pub fn with_lld_enabled(self) -> LinkerFlavor {
         match self {
-            LinkerFlavor::Gnu(cc, Lld::No) => LinkerFlavor::Gnu(cc, Lld::Yes),
-            LinkerFlavor::Darwin(cc, Lld::No) => LinkerFlavor::Darwin(cc, Lld::Yes),
-            LinkerFlavor::Msvc(Lld::No) => LinkerFlavor::Msvc(Lld::Yes),
+            LinkerFlavor::Gnu(cc, LinkerSelection::System) => {
+                LinkerFlavor::Gnu(cc, LinkerSelection::Lld)
+            }
+            LinkerFlavor::Darwin(cc, LinkerSelection::System) => {
+                LinkerFlavor::Darwin(cc, LinkerSelection::Lld)
+            }
+            LinkerFlavor::Msvc(LinkerSelection::System) => LinkerFlavor::Msvc(LinkerSelection::Lld),
             _ => self,
         }
     }
@@ -444,9 +456,13 @@ impl LinkerFlavor {
     /// flavor unmodified.
     pub fn with_lld_disabled(self) -> LinkerFlavor {
         match self {
-            LinkerFlavor::Gnu(cc, Lld::Yes) => LinkerFlavor::Gnu(cc, Lld::No),
-            LinkerFlavor::Darwin(cc, Lld::Yes) => LinkerFlavor::Darwin(cc, Lld::No),
-            LinkerFlavor::Msvc(Lld::Yes) => LinkerFlavor::Msvc(Lld::No),
+            LinkerFlavor::Gnu(cc, LinkerSelection::Lld) => {
+                LinkerFlavor::Gnu(cc, LinkerSelection::System)
+            }
+            LinkerFlavor::Darwin(cc, LinkerSelection::Lld) => {
+                LinkerFlavor::Darwin(cc, LinkerSelection::System)
+            }
+            LinkerFlavor::Msvc(LinkerSelection::Lld) => LinkerFlavor::Msvc(LinkerSelection::System),
             _ => self,
         }
     }
@@ -484,20 +500,20 @@ macro_rules! linker_flavor_cli_impls {
 }
 
 linker_flavor_cli_impls! {
-    (LinkerFlavorCli::Gnu(Cc::No, Lld::No)) "gnu"
-    (LinkerFlavorCli::Gnu(Cc::No, Lld::Yes)) "gnu-lld"
-    (LinkerFlavorCli::Gnu(Cc::Yes, Lld::No)) "gnu-cc"
-    (LinkerFlavorCli::Gnu(Cc::Yes, Lld::Yes)) "gnu-lld-cc"
-    (LinkerFlavorCli::Darwin(Cc::No, Lld::No)) "darwin"
-    (LinkerFlavorCli::Darwin(Cc::No, Lld::Yes)) "darwin-lld"
-    (LinkerFlavorCli::Darwin(Cc::Yes, Lld::No)) "darwin-cc"
-    (LinkerFlavorCli::Darwin(Cc::Yes, Lld::Yes)) "darwin-lld-cc"
+    (LinkerFlavorCli::Gnu(Cc::No, LinkerSelection::System)) "gnu"
+    (LinkerFlavorCli::Gnu(Cc::No, LinkerSelection::Lld)) "gnu-lld"
+    (LinkerFlavorCli::Gnu(Cc::Yes, LinkerSelection::System)) "gnu-cc"
+    (LinkerFlavorCli::Gnu(Cc::Yes, LinkerSelection::Lld)) "gnu-lld-cc"
+    (LinkerFlavorCli::Darwin(Cc::No, LinkerSelection::System)) "darwin"
+    (LinkerFlavorCli::Darwin(Cc::No, LinkerSelection::Lld)) "darwin-lld"
+    (LinkerFlavorCli::Darwin(Cc::Yes, LinkerSelection::System)) "darwin-cc"
+    (LinkerFlavorCli::Darwin(Cc::Yes, LinkerSelection::Lld)) "darwin-lld-cc"
     (LinkerFlavorCli::WasmLld(Cc::No)) "wasm-lld"
     (LinkerFlavorCli::WasmLld(Cc::Yes)) "wasm-lld-cc"
     (LinkerFlavorCli::Unix(Cc::No)) "unix"
     (LinkerFlavorCli::Unix(Cc::Yes)) "unix-cc"
-    (LinkerFlavorCli::Msvc(Lld::Yes)) "msvc-lld"
-    (LinkerFlavorCli::Msvc(Lld::No)) "msvc"
+    (LinkerFlavorCli::Msvc(LinkerSelection::Lld)) "msvc-lld"
+    (LinkerFlavorCli::Msvc(LinkerSelection::System)) "msvc"
     (LinkerFlavorCli::EmCc) "em-cc"
     (LinkerFlavorCli::Bpf) "bpf"
     (LinkerFlavorCli::Llbc) "llbc"
@@ -2629,16 +2645,16 @@ fn add_link_args_iter(
     insert(flavor);
     match flavor {
         LinkerFlavor::Gnu(cc, lld) => {
-            assert_eq!(lld, Lld::No);
-            insert(LinkerFlavor::Gnu(cc, Lld::Yes));
+            assert_eq!(lld, LinkerSelection::System);
+            insert(LinkerFlavor::Gnu(cc, LinkerSelection::Lld));
         }
         LinkerFlavor::Darwin(cc, lld) => {
-            assert_eq!(lld, Lld::No);
-            insert(LinkerFlavor::Darwin(cc, Lld::Yes));
+            assert_eq!(lld, LinkerSelection::System);
+            insert(LinkerFlavor::Darwin(cc, LinkerSelection::Lld));
         }
         LinkerFlavor::Msvc(lld) => {
-            assert_eq!(lld, Lld::No);
-            insert(LinkerFlavor::Msvc(Lld::Yes));
+            assert_eq!(lld, LinkerSelection::System);
+            insert(LinkerFlavor::Msvc(LinkerSelection::Lld));
         }
         LinkerFlavor::WasmLld(..)
         | LinkerFlavor::Unix(..)
@@ -2692,9 +2708,11 @@ impl TargetOptions {
                 let linker_flavor = self.linker_flavor.with_cli_hints(*flavor);
                 // Normalize to no lld to avoid asserts.
                 let linker_flavor = match linker_flavor {
-                    LinkerFlavor::Gnu(cc, _) => LinkerFlavor::Gnu(cc, Lld::No),
-                    LinkerFlavor::Darwin(cc, _) => LinkerFlavor::Darwin(cc, Lld::No),
-                    LinkerFlavor::Msvc(_) => LinkerFlavor::Msvc(Lld::No),
+                    LinkerFlavor::Gnu(cc, _) => LinkerFlavor::Gnu(cc, LinkerSelection::System),
+                    LinkerFlavor::Darwin(cc, _) => {
+                        LinkerFlavor::Darwin(cc, LinkerSelection::System)
+                    }
+                    LinkerFlavor::Msvc(_) => LinkerFlavor::Msvc(LinkerSelection::System),
                     _ => linker_flavor,
                 };
                 if !args.contains_key(&linker_flavor) {
@@ -2735,7 +2753,7 @@ impl Default for TargetOptions {
             cfg_abi: CfgAbi::Unspecified,
             vendor: "unknown".into(),
             linker: option_env!("CFG_DEFAULT_LINKER").map(|s| s.into()),
-            linker_flavor: LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+            linker_flavor: LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
             linker_flavor_json: LinkerFlavorCli::Gcc,
             lld_flavor_json: LldFlavor::Ld,
             linker_is_gnu_json: true,

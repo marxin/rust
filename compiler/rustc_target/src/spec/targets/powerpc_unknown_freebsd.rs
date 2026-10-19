@@ -1,14 +1,14 @@
 use rustc_abi::Endian;
 
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, StackProbeType, Target, TargetMetadata, TargetOptions, base,
+    Arch, Cc, LinkerFlavor, LinkerSelection, StackProbeType, Target, TargetMetadata, TargetOptions, base,
 };
 
 pub(crate) fn target() -> Target {
     let mut base = base::freebsd::opts();
     // Extra hint to linker that we are generating secure-PLT code.
     base.add_pre_link_args(
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &["-m32", "--target=powerpc-unknown-freebsd13.0"],
     );
     base.max_atomic_width = Some(32);

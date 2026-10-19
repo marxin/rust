@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, Os, PanicStrategy, Target, TargetMetadata, TargetOptions,
+    Arch, Cc, LinkerFlavor, LinkerSelection, Os, PanicStrategy, Target, TargetMetadata, TargetOptions,
 };
 
 pub(crate) fn target() -> Target {
@@ -18,7 +18,7 @@ pub(crate) fn target() -> Target {
         options: TargetOptions {
             os: Os::AmdHsa,
             vendor: "amd".into(),
-            linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+            linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
             linker: Some("rust-lld".into()),
 
             // There are many CPUs, one for each hardware generation.

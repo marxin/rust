@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, FramePointer, LinkerFlavor, Lld, RustcAbi, StackProbeType, Target, TargetMetadata,
+    Arch, Cc, FramePointer, LinkerFlavor, LinkerSelection, RustcAbi, StackProbeType, Target, TargetMetadata,
     base,
 };
 
@@ -10,7 +10,7 @@ pub(crate) fn target() -> Target {
     // for an important comment.
     base.cpu = "pentium4".into();
     base.max_atomic_width = Some(64);
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m32", "-Wl,-melf_i386"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m32", "-Wl,-melf_i386"]);
     base.stack_probes = StackProbeType::Inline;
     base.supports_fentry = true;
     // FIXME(compiler-team#422): musl targets should be dynamically linked by default.

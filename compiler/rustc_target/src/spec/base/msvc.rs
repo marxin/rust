@@ -1,14 +1,14 @@
 use std::borrow::Cow;
 
-use crate::spec::{BinaryFormat, DebuginfoKind, LinkerFlavor, Lld, SplitDebuginfo, TargetOptions};
+use crate::spec::{BinaryFormat, DebuginfoKind, LinkerFlavor, LinkerSelection, SplitDebuginfo, TargetOptions};
 
 pub(crate) fn opts() -> TargetOptions {
     // Suppress the verbose logo and authorship debugging output, which would needlessly
     // clog any log files.
-    let pre_link_args = TargetOptions::link_args(LinkerFlavor::Msvc(Lld::No), &["/NOLOGO"]);
+    let pre_link_args = TargetOptions::link_args(LinkerFlavor::Msvc(LinkerSelection::System), &["/NOLOGO"]);
 
     TargetOptions {
-        linker_flavor: LinkerFlavor::Msvc(Lld::No),
+        linker_flavor: LinkerFlavor::Msvc(LinkerSelection::System),
         dll_tls_export: false,
         is_like_windows: true,
         is_like_msvc: true,

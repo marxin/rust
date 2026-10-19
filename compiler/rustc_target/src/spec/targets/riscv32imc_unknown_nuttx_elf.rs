@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, LlvmAbi, Os, PanicStrategy, RelocModel, Target, TargetMetadata,
+    Arch, Cc, LinkerFlavor, LinkerSelection, LlvmAbi, Os, PanicStrategy, RelocModel, Target, TargetMetadata,
     TargetOptions, cvs,
 };
 
@@ -19,7 +19,7 @@ pub(crate) fn target() -> Target {
         options: TargetOptions {
             families: cvs!["unix"],
             os: Os::NuttX,
-            linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+            linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
             linker: Some("rust-lld".into()),
             cpu: "generic-rv32".into(),
             max_atomic_width: Some(32),

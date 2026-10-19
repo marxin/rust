@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, LlvmAbi, Os, RelocModel, Target, TargetMetadata, TargetOptions,
+    Arch, Cc, LinkerFlavor, LinkerSelection, LlvmAbi, Os, RelocModel, Target, TargetMetadata, TargetOptions,
     cvs,
 };
 
@@ -8,7 +8,7 @@ const LINKER_SCRIPT: &str = include_str!("./mipsel_sony_psp_linker_script.ld");
 
 pub(crate) fn target() -> Target {
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &["--emit-relocs", "--nmagic"],
     );
 
@@ -27,7 +27,7 @@ pub(crate) fn target() -> Target {
         options: TargetOptions {
             os: Os::Psp,
             vendor: "sony".into(),
-            linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+            linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
             cpu: "mips2".into(),
             linker: Some("rust-lld".into()),
             relocation_model: RelocModel::Static,

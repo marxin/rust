@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, StackProbeType, Target, TargetMetadata, TargetOptions, base,
+    Arch, Cc, LinkerFlavor, LinkerSelection, StackProbeType, Target, TargetMetadata, TargetOptions, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -18,7 +18,7 @@ pub(crate) fn target() -> Target {
         options: TargetOptions {
             cpu: "x86-64".into(),
             plt_by_default: false,
-            pre_link_args: TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]),
+            pre_link_args: TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64"]),
             max_atomic_width: Some(64),
             stack_probes: StackProbeType::Inline,
             ..base::unikraft_linux_musl::opts()

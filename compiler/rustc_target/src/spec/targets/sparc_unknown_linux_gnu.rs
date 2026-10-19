@@ -1,7 +1,7 @@
 use rustc_abi::Endian;
 
 use crate::spec::{
-    Arch, Cc, CfgAbi, LinkerFlavor, Lld, RustcAbi, Target, TargetMetadata, TargetOptions, base,
+    Arch, Cc, CfgAbi, LinkerFlavor, LinkerSelection, RustcAbi, Target, TargetMetadata, TargetOptions, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -22,7 +22,7 @@ pub(crate) fn target() -> Target {
             cpu: "v9".into(),
             endian: Endian::Big,
             late_link_args: TargetOptions::link_args(
-                LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+                LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
                 &["-mcpu=v9", "-m32"],
             ),
             max_atomic_width: Some(32),

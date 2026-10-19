@@ -1,7 +1,7 @@
 use rustc_abi::{Align, Endian};
 
 use crate::spec::{
-    Arch, Cc, CfgAbi, LinkerFlavor, Lld, PanicStrategy, RelocModel, RustcAbi, SanitizerSet,
+    Arch, Cc, CfgAbi, LinkerFlavor, LinkerSelection, PanicStrategy, RelocModel, RustcAbi, SanitizerSet,
     StackProbeType, Target, TargetMetadata, TargetOptions,
 };
 
@@ -11,7 +11,7 @@ pub(crate) fn target() -> Target {
         cpu: "z10".into(),
         endian: Endian::Big,
         features: "+soft-float,-vector".into(),
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         max_atomic_width: Some(128),
         min_global_align: Some(Align::from_bits(16).unwrap()),

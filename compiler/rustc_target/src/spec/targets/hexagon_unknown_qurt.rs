@@ -1,8 +1,8 @@
-use crate::spec::{Arch, Cc, LinkerFlavor, Lld, Os, Target, TargetMetadata, TargetOptions, cvs};
+use crate::spec::{Arch, Cc, LinkerFlavor, LinkerSelection, Os, Target, TargetMetadata, TargetOptions, cvs};
 
 pub(crate) fn target() -> Target {
     let mut base = TargetOptions::default();
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), &["-G0"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), &["-G0"]);
 
     Target {
         llvm_target: "hexagon-unknown-elf".into(),
@@ -25,7 +25,7 @@ pub(crate) fn target() -> Target {
             vendor: "unknown".into(),
             cpu: "hexagonv69".into(),
             linker: Some("hexagon-clang".into()),
-            linker_flavor: LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+            linker_flavor: LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
             exe_suffix: ".elf".into(),
             dynamic_linking: true,
             executables: true,

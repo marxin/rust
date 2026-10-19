@@ -44,8 +44,8 @@ use rustc_span::{Symbol, bug};
 use rustc_structures::{CrateType, NativeLibKind};
 use rustc_target::spec::crt_objects::CrtObjects;
 use rustc_target::spec::{
-    BinaryFormat, Cc, CfgAbi, Env, LinkOutputKind, LinkSelfContainedComponents,
-    LinkSelfContainedDefault, LinkerFeatures, LinkerFlavor, LinkerFlavorCli, Lld, Os, RelocModel,
+    LinkerSelection, BinaryFormat, Cc, CfgAbi, Env, LinkOutputKind, LinkSelfContainedComponents,
+    LinkSelfContainedDefault, LinkerFeatures, LinkerFlavor, LinkerFlavorCli, Os, RelocModel,
     RelroLevel, SanitizerSet, SplitDebuginfo,
 };
 use tracing::{debug, info, warn};
@@ -1032,7 +1032,7 @@ struct LinkerOutput {
 fn is_msvc_link_exe(sess: &Session) -> bool {
     let (linker_path, flavor) = linker_and_flavor(sess);
     sess.target.is_like_msvc
-        && flavor == LinkerFlavor::Msvc(Lld::No)
+        && flavor == LinkerFlavor::Msvc(LinkerSelection::System)
         // Match exactly "link.exe"
         && linker_path.to_str() == Some("link.exe")
 }
@@ -1046,7 +1046,7 @@ fn is_windows_gnu_ld(sess: &Session) -> bool {
     let (_, flavor) = linker_and_flavor(sess);
     sess.target.is_like_windows
         && !sess.target.is_like_msvc
-        && matches!(flavor, LinkerFlavor::Gnu(_, Lld::No))
+        && matches!(flavor, LinkerFlavor::Gnu(_, LinkerSelection::System))
         && sess.target.options.cfg_abi != CfgAbi::Llvm
 }
 
@@ -1054,7 +1054,7 @@ fn is_windows_gnu_clang(sess: &Session) -> bool {
     let (_, flavor) = linker_and_flavor(sess);
     sess.target.is_like_windows
         && !sess.target.is_like_msvc
-        && matches!(flavor, LinkerFlavor::Gnu(Cc::Yes, Lld::No))
+        && matches!(flavor, LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System))
         && sess.target.options.cfg_abi == CfgAbi::Llvm
 }
 
@@ -1333,7 +1333,7 @@ fn link_natively(
         // to spawn multiple instances on the happy path to do version checking, and ensures things
         // keep working on the tier 1 baseline of GLIBC 2.17+. That is generally understood as GCCs
         // circa RHEL/CentOS 7, 4.5 or so, whereas lld support was added in GCC 9.
-        if matches!(flavor, LinkerFlavor::Gnu(Cc::Yes, Lld::Yes))
+        if matches!(flavor, LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::Lld))
             && unknown_arg_regex.is_match(&out)
             && out.contains("-fuse-ld=lld")
             && cmd.get_args().iter().any(|e| e.to_string_lossy() == "-fuse-ld=lld")
@@ -1651,7 +1651,7 @@ fn escape_linker_output(s: &[u8], _flavour: LinkerFlavor) -> String {
 #[cfg(windows)]
 fn escape_linker_output(s: &[u8], flavour: LinkerFlavor) -> String {
     // This only applies to the actual MSVC linker.
-    if flavour != LinkerFlavor::Msvc(Lld::No) {
+    if flavour != LinkerFlavor::Msvc(LinkerSelection::System) {
         return escape_string(s);
     }
     match str::from_utf8(s) {
@@ -1823,7 +1823,10 @@ fn link_sanitizer_runtime(
         let rpath = path.to_str().expect("non-utf8 component in path");
         linker.link_args(&["-rpath", rpath]);
         linker.link_dylib_by_name(&filename, false, true);
-    } else if sess.target.is_like_msvc && flavor == LinkerFlavor::Msvc(Lld::No) && name == "asan" {
+    } else if sess.target.is_like_msvc
+        && flavor == LinkerFlavor::Msvc(LinkerSelection::System)
+        && name == "asan"
+    {
         // MSVC provides the `/INFERASANLIBS` argument to automatically find the
         // compatible ASAN library.
         linker.link_arg("/INFERASANLIBS");
@@ -1882,10 +1885,10 @@ pub fn linker_and_flavor(sess: &Session) -> (PathBuf, LinkerFlavor) {
                             "cc"
                         }
                     }
-                    LinkerFlavor::Gnu(_, Lld::Yes)
-                    | LinkerFlavor::Darwin(_, Lld::Yes)
+                    LinkerFlavor::Gnu(_, LinkerSelection::Lld)
+                    | LinkerFlavor::Darwin(_, LinkerSelection::Lld)
                     | LinkerFlavor::WasmLld(..)
-                    | LinkerFlavor::Msvc(Lld::Yes) => "lld",
+                    | LinkerFlavor::Msvc(LinkerSelection::Lld) => "lld",
                     LinkerFlavor::Gnu(..) | LinkerFlavor::Darwin(..) | LinkerFlavor::Unix(..) => {
                         "ld"
                     }

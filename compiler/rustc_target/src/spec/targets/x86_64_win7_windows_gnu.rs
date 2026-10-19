@@ -1,4 +1,4 @@
-use crate::spec::{Arch, Cc, LinkerFlavor, Lld, Target, TargetMetadata, TargetOptions, base};
+use crate::spec::{Arch, Cc, LinkerFlavor, LinkerSelection, Target, TargetMetadata, TargetOptions, base};
 
 pub(crate) fn target() -> Target {
     let mut base = TargetOptions {
@@ -11,10 +11,10 @@ pub(crate) fn target() -> Target {
     };
     // Use high-entropy 64 bit address space for ASLR
     base.add_pre_link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &["-m", "i386pep", "--high-entropy-va"],
     );
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64", "-Wl,--high-entropy-va"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64", "-Wl,--high-entropy-va"]);
 
     Target {
         llvm_target: "x86_64-pc-windows-gnu".into(),

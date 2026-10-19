@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, FloatAbi, LinkerFlavor, Lld, PanicStrategy, Target, TargetMetadata, TargetOptions, base,
+    Arch, FloatAbi, LinkerFlavor, LinkerSelection, PanicStrategy, Target, TargetMetadata, TargetOptions, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -11,7 +11,7 @@ pub(crate) fn target() -> Target {
     // should be smart enough to insert branch islands only
     // where necessary, but this is not the observed behavior.
     // Disabling the LBR optimization works around the issue.
-    base.add_pre_link_args(LinkerFlavor::Msvc(Lld::No), &["/OPT:NOLBR"]);
+    base.add_pre_link_args(LinkerFlavor::Msvc(LinkerSelection::System), &["/OPT:NOLBR"]);
 
     Target {
         llvm_target: "thumbv7a-pc-windows-msvc".into(),

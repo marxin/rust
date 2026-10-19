@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use crate::spec::crt_objects::pre_mingw_self_contained;
 use crate::spec::{
-    BinaryFormat, Cc, CfgAbi, DebuginfoKind, Env, LinkSelfContainedDefault, LinkerFlavor, Lld, Os,
+    BinaryFormat, Cc, CfgAbi, DebuginfoKind, Env, LinkSelfContainedDefault, LinkerFlavor, LinkerSelection, Os,
     SplitDebuginfo, TargetOptions, add_link_args, cvs,
 };
 
@@ -12,16 +12,16 @@ pub(crate) fn opts() -> TargetOptions {
     // There were attempts to make it behave like libgcc (so one can just use -l<name>)
     // but LLVM maintainers rejected it: https://reviews.llvm.org/D51440
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &["-nolibc", "--unwindlib=libunwind", "-static-libgcc"],
     );
     // Order of `late_link_args*` does not matter with LLD.
     let mingw_libs = &["-lmingw32", "-lmingwex", "-lmsvcrt", "-lkernel32", "-luser32"];
 
     let mut late_link_args =
-        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, Lld::No), mingw_libs);
-    add_link_args(&mut late_link_args, LinkerFlavor::Gnu(Cc::No, Lld::No), &["-l:libunwind.a"]);
-    add_link_args(&mut late_link_args, LinkerFlavor::Gnu(Cc::Yes, Lld::No), mingw_libs);
+        TargetOptions::link_args(LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), mingw_libs);
+    add_link_args(&mut late_link_args, LinkerFlavor::Gnu(Cc::No, LinkerSelection::System), &["-l:libunwind.a"]);
+    add_link_args(&mut late_link_args, LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), mingw_libs);
 
     TargetOptions {
         os: Os::Windows,

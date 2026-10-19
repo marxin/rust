@@ -1,12 +1,12 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, SanitizerSet, StackProbeType, Target, TargetMetadata, base,
+    Arch, Cc, LinkerFlavor, LinkerSelection, SanitizerSet, StackProbeType, Target, TargetMetadata, base,
 };
 
 pub(crate) fn target() -> Target {
     let mut base = base::linux_ohos::opts();
     base.cpu = "x86-64".into();
     base.max_atomic_width = Some(64);
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64"]);
     base.stack_probes = StackProbeType::Inline;
     base.static_position_independent_executables = true;
     base.supported_sanitizers = SanitizerSet::ADDRESS

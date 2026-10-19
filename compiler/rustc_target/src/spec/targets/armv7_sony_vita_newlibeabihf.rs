@@ -1,7 +1,7 @@
 use rustc_abi::Endian;
 
 use crate::spec::{
-    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, Lld, Os, RelocModel, Target, TargetMetadata,
+    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, LinkerSelection, Os, RelocModel, Target, TargetMetadata,
     TargetOptions, cvs,
 };
 
@@ -10,7 +10,7 @@ use crate::spec::{
 /// Requires the VITASDK toolchain on the host system.
 pub(crate) fn target() -> Target {
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &["-Wl,-q", "-Wl,--pic-veneer"],
     );
 
@@ -36,7 +36,7 @@ pub(crate) fn target() -> Target {
             vendor: "sony".into(),
             cfg_abi: CfgAbi::EabiHf,
             llvm_floatabi: Some(FloatAbi::Hard),
-            linker_flavor: LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+            linker_flavor: LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
             no_default_libraries: false,
             cpu: "cortex-a9".into(),
             families: cvs!["unix"],

@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, LinkerFlavor, Lld, RustcAbi, SanitizerSet, Target, TargetMetadata, TargetOptions, base,
+    Arch, LinkerFlavor, LinkerSelection, RustcAbi, SanitizerSet, Target, TargetMetadata, TargetOptions, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -19,7 +19,7 @@ pub(crate) fn target() -> Target {
     };
 
     base.add_pre_link_args(
-        LinkerFlavor::Msvc(Lld::No),
+        LinkerFlavor::Msvc(LinkerSelection::System),
         &[
             // Mark all dynamic libraries and executables as compatible with the larger 4GiB address
             // space available to x86 Windows binaries on x86_64.

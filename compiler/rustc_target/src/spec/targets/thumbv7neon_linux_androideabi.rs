@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, CfgAbi, FloatAbi, LinkerFlavor, Lld, Target, TargetMetadata, TargetOptions, base,
+    Arch, Cc, CfgAbi, FloatAbi, LinkerFlavor, LinkerSelection, Target, TargetMetadata, TargetOptions, base,
 };
 
 // This target if is for the Android v7a ABI in thumb mode with
@@ -12,7 +12,7 @@ use crate::spec::{
 
 pub(crate) fn target() -> Target {
     let mut base = base::android::opts();
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-march=armv7-a"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-march=armv7-a"]);
     Target {
         llvm_target: "armv7-none-linux-android".into(),
         metadata: TargetMetadata {

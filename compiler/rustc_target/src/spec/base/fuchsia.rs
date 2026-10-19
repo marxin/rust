@@ -1,5 +1,5 @@
 use crate::spec::{
-    Cc, FramePointer, LinkOutputKind, LinkerFlavor, Lld, Os, TargetOptions, crt_objects, cvs,
+    Cc, FramePointer, LinkOutputKind, LinkerFlavor, LinkerSelection, Os, TargetOptions, crt_objects, cvs,
 };
 
 pub(crate) fn opts() -> TargetOptions {
@@ -9,7 +9,7 @@ pub(crate) fn opts() -> TargetOptions {
     //
     // https://github.com/llvm/llvm-project/blob/0419db6b95e246fe9dc90b5795beb77c393eb2ce/clang/lib/Driver/ToolChains/Fuchsia.cpp#L32
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &[
             "--build-id",
             "--hash-style=gnu",
@@ -31,7 +31,7 @@ pub(crate) fn opts() -> TargetOptions {
 
     TargetOptions {
         os: Os::Fuchsia,
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         dynamic_linking: true,
         families: cvs!["unix"],

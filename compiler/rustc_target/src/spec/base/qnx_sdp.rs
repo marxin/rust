@@ -1,5 +1,5 @@
 use crate::spec::{
-    Cc, LinkArgs, LinkerFlavor, Lld, Os, RelroLevel, Target, TargetMetadata, TargetOptions, cvs,
+    Cc, LinkArgs, LinkerFlavor, LinkerSelection, Os, RelroLevel, Target, TargetMetadata, TargetOptions, cvs,
 };
 
 pub(crate) fn opts() -> TargetOptions {
@@ -78,10 +78,10 @@ pub(crate) fn pre_link_args(api_var: ApiVariant, arch: Arch) -> LinkArgs {
     };
     match api_var {
         ApiVariant::Default => {
-            TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[qcc_arg])
+            TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &[qcc_arg])
         }
         ApiVariant::IoSock => TargetOptions::link_args(
-            LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+            LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
             &[qcc_arg, get_iosock_param(arch_lib_dir)],
         ),
     }

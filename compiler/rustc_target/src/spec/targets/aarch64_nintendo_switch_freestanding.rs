@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, Os, PanicStrategy, RelroLevel, StackProbeType, Target,
+    Arch, Cc, LinkerFlavor, LinkerSelection, Os, PanicStrategy, RelroLevel, StackProbeType, Target,
     TargetMetadata, TargetOptions,
 };
 
@@ -20,7 +20,7 @@ pub(crate) fn target() -> Target {
         arch: Arch::AArch64,
         options: TargetOptions {
             features: "+v8a,+neon,+crypto,+crc".into(),
-            linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+            linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
             linker: Some("rust-lld".into()),
             link_script: Some(LINKER_SCRIPT.into()),
             os: Os::Horizon,

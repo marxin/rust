@@ -5,7 +5,7 @@
 // features.
 
 use crate::spec::{
-    Arch, Cc, CodeModel, LinkerFlavor, Lld, PanicStrategy, RelroLevel, RustcAbi, SanitizerSet,
+    Arch, Cc, CodeModel, LinkerFlavor, LinkerSelection, PanicStrategy, RelroLevel, RustcAbi, SanitizerSet,
     StackProbeType, Target, TargetMetadata, TargetOptions,
 };
 
@@ -18,7 +18,7 @@ pub(crate) fn target() -> Target {
         position_independent_executables: true,
         static_position_independent_executables: true,
         relro_level: RelroLevel::Full,
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         rustc_abi: Some(RustcAbi::Softfloat),
         features: "-mmx,-sse,-sse2,-sse3,-ssse3,-sse4.1,-sse4.2,-avx,-avx2,+soft-float".into(),

@@ -16,7 +16,7 @@ use rustc_session::Session;
 use rustc_session::config::{self, DebugInfo, LinkerPluginLto, Lto, OptLevel, Strip};
 use rustc_span::bug;
 use rustc_structures::CrateType;
-use rustc_target::spec::{Arch, Cc, CfgAbi, LinkOutputKind, LinkerFlavor, Lld, Os};
+use rustc_target::spec::{Arch, Cc, CfgAbi, LinkOutputKind, LinkerFlavor, LinkerSelection, Os};
 use tracing::{debug, warn};
 
 use super::command::Command;
@@ -68,11 +68,11 @@ pub(crate) fn get_linker<'a>(
     let mut cmd = match linker.to_str() {
         Some(linker) if cfg!(windows) && linker.ends_with(".bat") => Command::bat_script(linker),
         _ => match flavor {
-            LinkerFlavor::Gnu(Cc::No, Lld::Yes)
-            | LinkerFlavor::Darwin(Cc::No, Lld::Yes)
+            LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld)
+            | LinkerFlavor::Darwin(Cc::No, LinkerSelection::Lld)
             | LinkerFlavor::WasmLld(Cc::No)
-            | LinkerFlavor::Msvc(Lld::Yes) => Command::lld(linker, flavor.lld_flavor()),
-            LinkerFlavor::Msvc(Lld::No)
+            | LinkerFlavor::Msvc(LinkerSelection::Lld) => Command::lld(linker, flavor.lld_flavor()),
+            LinkerFlavor::Msvc(LinkerSelection::System)
                 if sess.opts.cg.linker.is_none() && sess.target.linker.is_none() =>
             {
                 Command::new(msvc_tool.as_ref().map_or(linker, |t| t.path()))

@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, Target,
+    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, LinkerSelection, Os, PanicStrategy, RelocModel, Target,
     TargetMetadata, TargetOptions,
 };
 
@@ -14,7 +14,7 @@ pub(crate) fn target() -> Target {
         cfg_abi: CfgAbi::EabiHf,
         is_like_vexos: true,
         llvm_floatabi: Some(FloatAbi::Hard),
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         features: "+v7,+neon,+vfp3d16,+thumb2".into(),
         relocation_model: RelocModel::Static,

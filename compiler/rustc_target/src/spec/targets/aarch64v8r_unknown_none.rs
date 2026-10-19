@@ -1,12 +1,12 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, PanicStrategy, RelocModel, SanitizerSet, StackProbeType, Target,
+    Arch, Cc, LinkerFlavor, LinkerSelection, PanicStrategy, RelocModel, SanitizerSet, StackProbeType, Target,
     TargetMetadata, TargetOptions,
 };
 
 pub(crate) fn target() -> Target {
     let opts = TargetOptions {
         // based off the aarch64-unknown-none target at time of addition
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         supported_sanitizers: SanitizerSet::KCFI
             | SanitizerSet::KERNELADDRESS

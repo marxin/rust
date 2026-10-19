@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, SanitizerSet, StackProbeType, Target, TargetMetadata, base,
+    Arch, Cc, LinkerFlavor, LinkerSelection, SanitizerSet, StackProbeType, Target, TargetMetadata, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -17,7 +17,7 @@ pub(crate) fn target() -> Target {
     base.supports_xray = true;
 
     base.add_pre_link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &[
             "--execute-only",
             // Enable the Cortex-A53 errata 843419 mitigation by default

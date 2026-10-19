@@ -1,11 +1,11 @@
 use crate::spec::{
-    Arch, Cc, CfgAbi, CodeModel, Endian, FramePointer, LinkerFlavor, Lld, LlvmAbi, Os,
+    Arch, Cc, CfgAbi, CodeModel, Endian, FramePointer, LinkerFlavor, LinkerSelection, LlvmAbi, Os,
     PanicStrategy, RelocModel, Target, TargetMetadata, TargetOptions,
 };
 
 pub(crate) fn target() -> Target {
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &[
             // We strictly need ELFv1 PPC64.
             "-m",
@@ -72,7 +72,7 @@ pub(crate) fn target() -> Target {
             // - [rust-lang/rust#85589](https://github.com/rust-lang/rust/issues/85589)
             // - [llvm/llvm-project#27630](https://github.com/llvm/llvm-project/issues/27630)
             linker: Some("mold".into()),
-            linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::No),
+            linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
 
             // CellOS _is_ case-sensitive, but the PS3's binaries vary
             //  in casing depending on whether they are games in `/dev_hdd0`

@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, FramePointer, LinkerFlavor, Lld, SanitizerSet, StackProbeType, Target,
+    Arch, Cc, FramePointer, LinkerFlavor, LinkerSelection, SanitizerSet, StackProbeType, Target,
     TargetMetadata, TargetOptions, base,
 };
 
@@ -18,7 +18,7 @@ pub(crate) fn target() -> Target {
         options: TargetOptions {
             // Enable the Cortex-A53 errata 843419 mitigation by default
             pre_link_args: TargetOptions::link_args(
-                LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+                LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
                 &["-Wl,--fix-cortex-a53-843419"],
             ),
             features: "+v8a,+outline-atomics".into(),

@@ -1,4 +1,4 @@
-use crate::spec::{Arch, Cc, LinkerFlavor, Lld, RelocModel, Target, TargetOptions};
+use crate::spec::{Arch, Cc, LinkerFlavor, LinkerSelection, RelocModel, Target, TargetOptions};
 
 pub(crate) fn target() -> Target {
     Target {
@@ -18,9 +18,9 @@ pub(crate) fn target() -> Target {
             exe_suffix: ".elf".into(),
             linker: Some("avr-gcc".into()),
             eh_frame_header: false,
-            pre_link_args: TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &[]),
+            pre_link_args: TargetOptions::link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &[]),
             late_link_args: TargetOptions::link_args(
-                LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+                LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
                 &["-lgcc"],
             ),
             max_atomic_width: Some(16),

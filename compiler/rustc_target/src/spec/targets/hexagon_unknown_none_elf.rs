@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, PanicStrategy, Target, TargetMetadata, TargetOptions,
+    Arch, Cc, LinkerFlavor, LinkerSelection, PanicStrategy, Target, TargetMetadata, TargetOptions,
 };
 
 pub(crate) fn target() -> Target {
@@ -30,7 +30,7 @@ pub(crate) fn target() -> Target {
             emit_debug_gdb_scripts: false,
             c_enum_min_bits: Some(8),
             linker: Some("rust-lld".into()),
-            linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+            linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
             ..Default::default()
         },
     }

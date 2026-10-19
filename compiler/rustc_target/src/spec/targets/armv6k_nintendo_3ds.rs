@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, Lld, Os, RelocModel, Target, TargetMetadata,
+    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, LinkerSelection, Os, RelocModel, Target, TargetMetadata,
     TargetOptions, cvs,
 };
 
@@ -8,7 +8,7 @@ use crate::spec::{
 /// Requires the devkitARM toolchain for 3DS targets on the host system.
 pub(crate) fn target() -> Target {
     let pre_link_args = TargetOptions::link_args(
-        LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+        LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
         &["-specs=3dsx.specs", "-mtune=mpcore", "-mfloat-abi=hard", "-mtp=soft"],
     );
 

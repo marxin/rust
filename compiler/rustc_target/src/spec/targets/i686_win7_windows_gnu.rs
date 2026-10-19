@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, FramePointer, LinkerFlavor, Lld, RustcAbi, Target, TargetMetadata, TargetOptions,
+    Arch, Cc, FramePointer, LinkerFlavor, LinkerSelection, RustcAbi, Target, TargetMetadata, TargetOptions,
     base,
 };
 
@@ -17,10 +17,10 @@ pub(crate) fn target() -> Target {
     // Mark all dynamic libraries and executables as compatible with the larger 4GiB address
     // space available to x86 Windows binaries on x86_64.
     base.add_pre_link_args(
-        LinkerFlavor::Gnu(Cc::No, Lld::No),
+        LinkerFlavor::Gnu(Cc::No, LinkerSelection::System),
         &["-m", "i386pe", "--large-address-aware"],
     );
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-Wl,--large-address-aware"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-Wl,--large-address-aware"]);
 
     Target {
         llvm_target: "i686-pc-windows-gnu".into(),

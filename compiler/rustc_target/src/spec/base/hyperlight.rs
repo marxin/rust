@@ -1,11 +1,11 @@
 use crate::spec::{
-    Cc, CodeModel, LinkerFlavor, Lld, Os, PanicStrategy, RelocModel, StackProbeType, TargetOptions,
+    Cc, CodeModel, LinkerFlavor, LinkerSelection, Os, PanicStrategy, RelocModel, StackProbeType, TargetOptions,
 };
 
 pub(crate) fn opts() -> TargetOptions {
     TargetOptions {
         os: Os::Hyperlight,
-        linker_flavor: LinkerFlavor::Gnu(Cc::No, Lld::Yes),
+        linker_flavor: LinkerFlavor::Gnu(Cc::No, LinkerSelection::Lld),
         linker: Some("rust-lld".into()),
         disable_redzone: true,
         panic_strategy: PanicStrategy::Abort,

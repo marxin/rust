@@ -4,7 +4,7 @@ use std::num::ParseIntError;
 use std::str::FromStr;
 
 use crate::spec::{
-    BinaryFormat, Cc, CfgAbi, DebuginfoKind, Env, FloatAbi, FramePointer, LinkerFlavor, Lld, Os,
+    BinaryFormat, Cc, CfgAbi, DebuginfoKind, Env, FloatAbi, FramePointer, LinkerFlavor, LinkerSelection, Os,
     RustcAbi, SplitDebuginfo, StackProbeType, StaticCow, Target, TargetOptions, cvs,
 };
 
@@ -139,7 +139,7 @@ pub(crate) fn base(
         cpu: arch.target_cpu(env).into(),
         link_env_remove,
         vendor: "apple".into(),
-        linker_flavor: LinkerFlavor::Darwin(Cc::Yes, Lld::No),
+        linker_flavor: LinkerFlavor::Darwin(Cc::Yes, LinkerSelection::System),
         // macOS has -dead_strip, which doesn't rely on function_sections
         function_sections: false,
         dynamic_linking: true,

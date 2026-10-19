@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, LinkerFlavor, Lld, SanitizerSet, StackProbeType, Target, TargetMetadata,
+    Arch, Cc, LinkerFlavor, LinkerSelection, SanitizerSet, StackProbeType, Target, TargetMetadata,
     TargetOptions, base,
 };
 
@@ -10,7 +10,7 @@ pub(crate) fn target() -> Target {
     // https://developer.android.com/ndk/guides/abis.html#86-64
     base.features = "+mmx,+sse,+sse2,+sse3,+ssse3,+sse4.1,+sse4.2,+popcnt".into();
     base.max_atomic_width = Some(64);
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-m64"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-m64"]);
     base.stack_probes = StackProbeType::Inline;
     base.supports_xray = true;
 

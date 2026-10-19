@@ -5,7 +5,7 @@
 // The cdecl ABI is used. It differs from the stdcall or fastcall ABI.
 // "i686-unknown-windows" is used to get the minimal subset of windows-specific features.
 
-use crate::spec::{Arch, LinkerFlavor, Lld, RustcAbi, Target, TargetMetadata, add_link_args, base};
+use crate::spec::{Arch, LinkerFlavor, LinkerSelection, RustcAbi, Target, TargetMetadata, add_link_args, base};
 
 pub(crate) fn target() -> Target {
     let mut base = base::uefi_msvc::opts();
@@ -29,7 +29,7 @@ pub(crate) fn target() -> Target {
     // DWARF is disabled.
     //
     // This is only needed in the i686 target due to using the `-gnu` LLVM target (see below).
-    add_link_args(&mut base.post_link_args, LinkerFlavor::Msvc(Lld::No), &["/DEBUG:NODWARF"]);
+    add_link_args(&mut base.post_link_args, LinkerFlavor::Msvc(LinkerSelection::System), &["/DEBUG:NODWARF"]);
 
     // Use -GNU here, because of the reason below:
     // Background and Problem:

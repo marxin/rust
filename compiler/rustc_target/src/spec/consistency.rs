@@ -4,7 +4,7 @@ use rustc_abi::Endian;
 use rustc_data_structures::fx::FxHashSet;
 
 use crate::spec::{
-    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, Lld, LlvmAbi, Os, RelocModel, RustcAbi, Target,
+    Arch, Cc, CfgAbi, Env, FloatAbi, LinkerFlavor, LinkerSelection, LlvmAbi, Os, RelocModel, RustcAbi, Target,
     TargetKind,
 };
 
@@ -180,19 +180,19 @@ impl Target {
             // Check that link args for lld and non-lld versions of flavors are consistent.
             for cc in [Cc::No, Cc::Yes] {
                 check_eq!(
-                    args.get(&LinkerFlavor::Gnu(cc, Lld::No)),
-                    args.get(&LinkerFlavor::Gnu(cc, Lld::Yes)),
+                    args.get(&LinkerFlavor::Gnu(cc, LinkerSelection::System)),
+                    args.get(&LinkerFlavor::Gnu(cc, LinkerSelection::Lld)),
                     "link args for lld and non-lld versions of flavors are not consistent",
                 );
                 check_eq!(
-                    args.get(&LinkerFlavor::Darwin(cc, Lld::No)),
-                    args.get(&LinkerFlavor::Darwin(cc, Lld::Yes)),
+                    args.get(&LinkerFlavor::Darwin(cc, LinkerSelection::System)),
+                    args.get(&LinkerFlavor::Darwin(cc, LinkerSelection::Lld)),
                     "link args for lld and non-lld versions of flavors are not consistent",
                 );
             }
             check_eq!(
-                args.get(&LinkerFlavor::Msvc(Lld::No)),
-                args.get(&LinkerFlavor::Msvc(Lld::Yes)),
+                args.get(&LinkerFlavor::Msvc(LinkerSelection::System)),
+                args.get(&LinkerFlavor::Msvc(LinkerSelection::Lld)),
                 "link args for lld and non-lld versions of flavors are not consistent",
             );
         }

@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, CodeModel, LinkerFlavor, Lld, LlvmAbi, SanitizerSet, Target, TargetMetadata,
+    Arch, Cc, CodeModel, LinkerFlavor, LinkerSelection, LlvmAbi, SanitizerSet, Target, TargetMetadata,
     TargetOptions, base,
 };
 
@@ -23,7 +23,7 @@ pub(crate) fn target() -> Target {
             max_atomic_width: Some(64),
             mcount: "_mcount".into(),
             pre_link_args: TargetOptions::link_args(
-                LinkerFlavor::Gnu(Cc::Yes, Lld::No),
+                LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System),
                 &["-Wl,--no-rosegment"],
             ),
             supported_sanitizers: SanitizerSet::ADDRESS

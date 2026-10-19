@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, Cc, CfgAbi, FloatAbi, LinkerFlavor, Lld, SanitizerSet, Target, TargetMetadata,
+    Arch, Cc, CfgAbi, FloatAbi, LinkerFlavor, LinkerSelection, SanitizerSet, Target, TargetMetadata,
     TargetOptions, base,
 };
 
@@ -13,7 +13,7 @@ use crate::spec::{
 
 pub(crate) fn target() -> Target {
     let mut base = base::android::opts();
-    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, Lld::No), &["-march=armv7-a"]);
+    base.add_pre_link_args(LinkerFlavor::Gnu(Cc::Yes, LinkerSelection::System), &["-march=armv7-a"]);
     Target {
         llvm_target: "arm-none-linux-android".into(),
         metadata: TargetMetadata {

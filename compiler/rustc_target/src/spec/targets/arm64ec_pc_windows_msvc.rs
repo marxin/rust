@@ -1,5 +1,5 @@
 use crate::spec::{
-    Arch, FramePointer, LinkerFlavor, Lld, Target, TargetMetadata, add_link_args, base,
+    Arch, FramePointer, LinkerFlavor, LinkerSelection, Target, TargetMetadata, add_link_args, base,
 };
 
 pub(crate) fn target() -> Target {
@@ -8,7 +8,7 @@ pub(crate) fn target() -> Target {
     base.features = "+v8a,+neon".into();
     add_link_args(
         &mut base.late_link_args,
-        LinkerFlavor::Msvc(Lld::No),
+        LinkerFlavor::Msvc(LinkerSelection::System),
         &["/machine:arm64ec", "softintrin.lib"],
     );
 
