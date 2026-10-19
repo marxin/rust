@@ -2945,6 +2945,12 @@ pub fn build_session_options(
         ));
     }
 
+    if cg.linker_features.enabled.contains(LinkerFeatures::LLD)
+        && cg.linker_features.enabled.contains(LinkerFeatures::WILD)
+    {
+        early_dcx.early_fatal("selected `linker-features` are mutually exclusive: `+lld`, `+wild`");
+    }
+
     let prints = print_request::collect_print_requests(
         early_dcx,
         &mut cg,
