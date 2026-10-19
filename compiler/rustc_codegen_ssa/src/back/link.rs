@@ -4198,8 +4198,6 @@ fn add_wild_args(
         sess.dcx().emit_fatal(diagnostics::SelfContainedLinkerMissing);
     }
 
-    // TODO: add clang support
-
     if !sess.target.is_like_wasm {
         cmd.cc_arg("-fuse-ld=bfd");
     }
