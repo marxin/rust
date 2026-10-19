@@ -257,8 +257,8 @@ impl LinkerFlavor {
     /// Returns the modern CLI flavor that is the counterpart of this flavor.
     fn to_cli_counterpart(self) -> LinkerFlavorCli {
         match self {
-            LinkerFlavor::Gnu(cc, lld) => LinkerFlavorCli::Gnu(cc, lld),
-            LinkerFlavor::Darwin(cc, lld) => LinkerFlavorCli::Darwin(cc, lld),
+            LinkerFlavor::Gnu(cc, linker) => LinkerFlavorCli::Gnu(cc, linker),
+            LinkerFlavor::Darwin(cc, linker) => LinkerFlavorCli::Darwin(cc, linker),
             LinkerFlavor::WasmLld(cc) => LinkerFlavorCli::WasmLld(cc),
             LinkerFlavor::Unix(cc) => LinkerFlavorCli::Unix(cc),
             LinkerFlavor::Msvc(lld) => LinkerFlavorCli::Msvc(lld),
@@ -270,8 +270,8 @@ impl LinkerFlavor {
 
     fn infer_cli_hints(cli: LinkerFlavorCli) -> (Option<Cc>, Option<LinkerSelection>) {
         match cli {
-            LinkerFlavorCli::Gnu(cc, lld) | LinkerFlavorCli::Darwin(cc, lld) => {
-                (Some(cc), Some(lld))
+            LinkerFlavorCli::Gnu(cc, linker) | LinkerFlavorCli::Darwin(cc, linker) => {
+                (Some(cc), Some(linker))
             }
             LinkerFlavorCli::WasmLld(cc) => (Some(cc), Some(LinkerSelection::Lld)),
             LinkerFlavorCli::Unix(cc) => (Some(cc), None),
@@ -418,6 +418,22 @@ impl LinkerFlavor {
         }
     }
 
+    /// Returns whether the flavor uses the `wild` linker.
+    pub fn uses_wild(self) -> bool {
+        // Exhaustive match in case new flavors are added in the future.
+        match self {
+            LinkerFlavor::Gnu(_, LinkerSelection::Wild) => true,
+            LinkerFlavor::Gnu(.., LinkerSelection::Lld | LinkerSelection::System)
+            | LinkerFlavor::Darwin(..)
+            | LinkerFlavor::Msvc(_)
+            | LinkerFlavor::Unix(_)
+            | LinkerFlavor::Bpf
+            | LinkerFlavor::Llbc
+            | LinkerFlavor::WasmLld(..)
+            | LinkerFlavor::EmCc => false,
+        }
+    }
+
     /// Returns whether the flavor calls the linker via a C/C++ compiler.
     pub fn uses_cc(self) -> bool {
         // Exhaustive match in case new flavors are added in the future.
@@ -463,6 +479,34 @@ impl LinkerFlavor {
                 LinkerFlavor::Darwin(cc, LinkerSelection::System)
             }
             LinkerFlavor::Msvc(LinkerSelection::Lld) => LinkerFlavor::Msvc(LinkerSelection::System),
+            _ => self,
+        }
+    }
+
+    /// For flavors with an `Wild` component, ensure it's enabled. Otherwise, returns the given
+    /// flavor unmodified.
+    pub fn with_wild_enabled(self) -> LinkerFlavor {
+        match self {
+            LinkerFlavor::Gnu(cc, LinkerSelection::System | LinkerSelection::Lld) => {
+                LinkerFlavor::Gnu(cc, LinkerSelection::Wild)
+            }
+            _ => self,
+        }
+    }
+
+    /// For flavors with an `Wild` component, ensure it's disabled. Otherwise, returns the given
+    /// flavor unmodified.
+    pub fn with_wild_disabled(self) -> LinkerFlavor {
+        match self {
+            LinkerFlavor::Gnu(cc, LinkerSelection::Wild) => {
+                LinkerFlavor::Gnu(cc, LinkerSelection::System)
+            }
+            LinkerFlavor::Darwin(cc, LinkerSelection::Wild) => {
+                LinkerFlavor::Darwin(cc, LinkerSelection::System)
+            }
+            LinkerFlavor::Msvc(LinkerSelection::Wild) => {
+                LinkerFlavor::Msvc(LinkerSelection::System)
+            }
             _ => self,
         }
     }

@@ -494,8 +494,6 @@ impl LinkerFeaturesCli {
         // Duplicate flags are reduced as we go, the last occurrence wins:
         // `+feature,-feature,+feature` only enables the feature, and does not record it as both
         // enabled and disabled on the CLI.
-        // We also only expose `+/-lld` at the moment, as it's currently the only implemented linker
-        // feature and toggling `LinkerFeatures::CC` would be a noop.
         match feature {
             "+lld" => {
                 self.enabled.insert(LinkerFeatures::LLD);
@@ -505,6 +503,16 @@ impl LinkerFeaturesCli {
             "-lld" => {
                 self.disabled.insert(LinkerFeatures::LLD);
                 self.enabled.remove(LinkerFeatures::LLD);
+                Some(())
+            }
+            "+wild" => {
+                self.enabled.insert(LinkerFeatures::WILD);
+                self.disabled.remove(LinkerFeatures::WILD);
+                Some(())
+            }
+            "-wild" => {
+                self.disabled.insert(LinkerFeatures::WILD);
+                self.enabled.remove(LinkerFeatures::WILD);
                 Some(())
             }
             _ => None,
@@ -540,6 +548,8 @@ impl LinkerFeaturesCli {
                 unstable_features.join(","),
             ));
         }
+
+        // TODO: add check for +wild
 
         Ok(())
     }

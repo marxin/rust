@@ -44,9 +44,9 @@ use rustc_span::{Symbol, bug};
 use rustc_structures::{CrateType, NativeLibKind};
 use rustc_target::spec::crt_objects::CrtObjects;
 use rustc_target::spec::{
-    LinkerSelection, BinaryFormat, Cc, CfgAbi, Env, LinkOutputKind, LinkSelfContainedComponents,
-    LinkSelfContainedDefault, LinkerFeatures, LinkerFlavor, LinkerFlavorCli, Os, RelocModel,
-    RelroLevel, SanitizerSet, SplitDebuginfo,
+    BinaryFormat, Cc, CfgAbi, Env, LinkOutputKind, LinkSelfContainedComponents,
+    LinkSelfContainedDefault, LinkerFeatures, LinkerFlavor, LinkerFlavorCli, LinkerSelection, Os,
+    RelocModel, RelroLevel, SanitizerSet, SplitDebuginfo,
 };
 use tracing::{debug, info, warn};
 
@@ -1885,6 +1885,7 @@ pub fn linker_and_flavor(sess: &Session) -> (PathBuf, LinkerFlavor) {
                             "cc"
                         }
                     }
+                    LinkerFlavor::Gnu(_, LinkerSelection::Wild) => "wild",
                     LinkerFlavor::Gnu(_, LinkerSelection::Lld)
                     | LinkerFlavor::Darwin(_, LinkerSelection::Lld)
                     | LinkerFlavor::WasmLld(..)
@@ -1926,7 +1927,11 @@ pub fn linker_and_flavor(sess: &Session) -> (PathBuf, LinkerFlavor) {
         features: LinkerFeaturesCli,
     ) -> LinkerFlavor {
         // Note: a linker feature cannot be both enabled and disabled on the CLI.
-        if features.enabled.contains(LinkerFeatures::LLD) {
+        if features.enabled.contains(LinkerFeatures::WILD) {
+            flavor.with_wild_enabled()
+        } else if features.disabled.contains(LinkerFeatures::WILD) {
+            flavor.with_wild_disabled()
+        } else if features.enabled.contains(LinkerFeatures::LLD) {
             flavor.with_lld_enabled()
         } else if features.disabled.contains(LinkerFeatures::LLD) {
             flavor.with_lld_disabled()
@@ -3223,6 +3228,7 @@ fn add_order_independent_options(
 ) {
     // Take care of the flavors and CLI options requesting the `lld` linker.
     add_lld_args(cmd, sess, flavor, self_contained_components);
+    add_wild_args(cmd, sess, flavor, self_contained_components);
 
     add_apple_link_args(cmd, sess, flavor);
 
@@ -4153,6 +4159,28 @@ fn add_lld_args(
             cmd.cc_arg(format!("--target={}", versioned_llvm_target(sess)));
         }
     }
+}
+
+fn add_wild_args(
+    cmd: &mut dyn Linker,
+    _sess: &Session,
+    flavor: LinkerFlavor,
+    self_contained_components: LinkSelfContainedComponents,
+) {
+    debug!(
+        "add_wild_args requested, flavor: '{:?}', target self-contained components: {:?}",
+        flavor, self_contained_components,
+    );
+
+    // If the flavor doesn't use a C/C++ compiler to invoke the linker, or doesn't opt in to `wild`,
+    // we don't need to do anything.
+    if !(flavor.uses_cc() && flavor.uses_wild()) {
+        return;
+    }
+
+    // TODO: use the gcc wrappers trick.
+
+    cmd.cc_arg("-fuse-ld=wild");
 }
 
 // gold has been deprecated with binutils 2.44
